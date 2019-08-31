@@ -44,7 +44,6 @@ public class ColorCalc {
 	public static final String NL = System.getProperty("line.separator");
 	// Delimit data by two or more white space, tabs, commons.
 	public static final String WORD_DELIM = "[\\s]{2,}|\t|,"; 
-	public static final String ESC = new String( new byte [] { 0x1B } );
     
 	// input options
     protected static String[] ins;
