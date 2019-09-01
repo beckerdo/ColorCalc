@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -33,6 +34,8 @@ import org.apache.commons.cli.ParseException;
  * -i  C:\\Users\\dan\\ArmyPainterDictionary.txt
  * -o C:\\Users\\dan\\output.txt
  * -d C:\\Users\\dan\\PrimarySecondaryTertiaryDictionary.txt
+ * -c Name,RGB,HSL,Dict-Name,Dict-RGB,Dict-HSL
+ * -s Dict-H,Dict-L,Name
  * 
  * @author <a href="mailto://dan@danbecker.info>Dan Becker</a>
  */
@@ -43,19 +46,22 @@ public class ColorCalc {
     public static final String CMD_DELIM = "\\s*,\\s*"; // 0* whitespace, comma, 0* whitespace
 	public static final String NL = System.getProperty("line.separator");
 	// Delimit data by two or more white space, tabs, commons.
-	public static final String WORD_DELIM = "[\\s]{2,}|\t|,"; 
+	public static final String WORD_DELIM = "[\\s]{2,}|\t|,";
+	public static final String PREFIX_DELIM = "-";
     
 	// input options
     protected static String[] ins;
     protected static String out;
     protected static String[] dicts;
     protected static String[] sorts;
-    protected static String[] headers;
+    protected static String[] cols;
 
     // program data
-    protected static Map<Color,List<String>> colorNames = new HashMap<>(); 
+    protected static Map<Color,List<String>> dictionaryNames = new HashMap<>(); 
+    protected static String[] headers;
     protected static String[] dictionaryHeaders;
     protected static BufferedWriter writer;
+    protected static List<String[]> outputData = new LinkedList<>(); 
 
 	public static void main(String [] args) throws Exception {
 		LOGGER.info("ColorCalc args=" + Arrays.toString(args));
@@ -74,10 +80,10 @@ public class ColorCalc {
 				LOGGER.info( "dictionary=" + Paths.get(dict).toString());
 				try (Stream<String> stream = Files.lines(Paths.get(dict))) {
 					stream.forEach(line-> {
-						addToDictionary( colorNames, dictionaryHeaders, line);
+						addToDictionary( dictionaryNames, dictionaryHeaders, line);
 					});
 				}
-				LOGGER.info( "dictionary size=" + colorNames.size());
+				LOGGER.info( "dictionary size=" + dictionaryNames.size());
 			}
 		}
 		
@@ -102,15 +108,7 @@ public class ColorCalc {
 									// data line
 									String [] data = scanner.tokens().toArray(String[]::new);
 									LOGGER.debug("data=" + Arrays.toString(data));
-									Color color = ColorUtils.toColor( data[ arrayPosition( headers, Col.RGB.getName() )]);
-									if ( null != color ) {
-										Entry<Color,List<String>> closest = closestColor(colorNames, color );
-										if ( null != closest ) {
-											String name = data[ arrayPosition( headers, Col.NAME.getName() )];
-											LOGGER.info( "Color " + name + ", color=" + ColorUtils.toRGB( color ) + " is closest to color " 
-											   + closest.getValue().toString() + ", color=" + ColorUtils.toRGB( closest.getKey()));											
-										}
-									}
+									populateOutputData(outputData, dictionaryNames, cols, headers, dictionaryHeaders, data);
 								}
 								scanner.close();
 							}
@@ -121,6 +119,11 @@ public class ColorCalc {
 				}
 			}
 		}
+		
+		// Sort outputData here
+		
+		// Put all output data to file
+		outputData( outputData, cols, writer );
 		
 		if ( null != writer ) {
 			writer.close();
@@ -137,6 +140,7 @@ public class ColorCalc {
         options.addOption("d", "dicts", true, "list of comma-separated dictionary files for comparisons");
         options.addOption("o", "out", true, "generated output file with results");
         options.addOption("s", "sorts", true, "column sort fields (followed by + or - for ascending, descending)");
+        options.addOption("c", "cols", true, "column output fields");
 
 		CommandLineParser cliParser = new DefaultParser();
 		CommandLine line = cliParser.parse(options, args);
@@ -168,10 +172,15 @@ public class ColorCalc {
             sorts = option.split(CMD_DELIM);
             LOGGER.info("sorts=" + Arrays.toString( sorts ));
         }
+        if (line.hasOption("c")) {
+            String option = line.getOptionValue("cols");
+            cols = option.split(CMD_DELIM);
+            LOGGER.info("cols=" + Arrays.toString( cols ));
+        }
 	}
 	
 	/** Create dictionary from given files */
-	public static void addToDictionary(Map<Color, List<String>> colorNames, String[] localDictionaryHeaders, String line) {
+	public static void addToDictionary(Map<Color, List<String>> dictionaryNames, String[] localDictionaryHeaders, String line) {
 		if (line.startsWith("#")) {
 			LOGGER.debug("dictionary comment=" + line);
 		} else {
@@ -191,17 +200,17 @@ public class ColorCalc {
 					Color color = ColorUtils.toColor( data[ colorIndex ]);
 					String name = data[ nameIndex ];
 					LOGGER.debug( "dictionary color=" + color.toString() + ", name=" + name );
-					if ( null != colorNames && null != name) {
-						List<String> names = colorNames.get(color);
+					if ( null != dictionaryNames && null != name) {
+						List<String> names = dictionaryNames.get(color);
 						if ( null == names ) {
 							names = new LinkedList<>();
-							names.add(  name );
+							names.add( name );
 						} else {
 							if ( !names.contains(name)) {
-								names.add(  name );
+								names.add( name );
 							}
 						}
-						colorNames.put(color,names);
+						dictionaryNames.put(color,names);
 					}
 				}
 			}
@@ -228,15 +237,15 @@ public class ColorCalc {
 	
 	/**
 	 * Return the closest color in the dictionary.
-	 * @param colorNames
+	 * @param dictionaryNames
 	 * @param color
 	 * @return dictionary entry or null for none found.
 	 */
-	public static Entry<Color,List<String>> closestColor( Map<Color,List<String>> colorNames, Color color ){
-		if ( null == colorNames || null == color) 
+	public static Entry<Color,List<String>> closestColor( Map<Color,List<String>> dictionaryNames, Color color ){
+		if ( null == dictionaryNames || null == color) 
 			return null;
 		
-		Set<Entry<Color,List<String>>> colorEntries = colorNames.entrySet();
+		Set<Entry<Color,List<String>>> colorEntries = dictionaryNames.entrySet();
 		double minDist = Double.MAX_VALUE;
 		Entry<Color,List<String>>  closest = null;
 
@@ -251,4 +260,151 @@ public class ColorCalc {
 		return closest;
 	}
 
+	/** Take the given data line and populate the columns of the output file
+	 *  from the dictionary and calculations 
+	 *  Example column names  "Name,RGB,HSL,Dict-Name,Dict-RGB,Dict-HSL"
+*/
+	public static void populateOutputData(List<String[]> outputData, Map<Color,List<String>> dictionaryNames,
+			String[] cols, String[] headers, String[] dictionaryHeaders, String[] data) {
+
+		// Need to have basic info to make an output line.
+		Color color = ColorUtils.toColor( data[ arrayPosition( headers, Col.RGB.getName() )]);
+		if ( null == color ) {
+			throw new IllegalArgumentException( "missing color on data row " + Arrays.deepToString( data ));
+		}
+		String name = data[arrayPosition(headers, Col.NAME.getName())];		
+		
+		String[] outputRow = new String[cols.length];		
+		int colIndex = 0;
+		StringBuilder loggerInfo = new StringBuilder();
+		for ( String col : cols ) {
+			String prefix = "";
+			int delimLoc = col.indexOf(PREFIX_DELIM);
+			if ( -1 != delimLoc ) {
+				// Column name has a prefix;
+				prefix = col.substring( 0, delimLoc );
+				col = col.substring( delimLoc + 1);
+				// LOGGER.debug( "Col name=" + col + ", delimLoc=" + delimLoc + ", prefix=" + prefix);
+			}
+			switch ( col ) {
+				case "Name" : {
+					if ( "".equals( prefix ) || "Input".equals( prefix )) {
+						outputRow[ colIndex ] = name;
+					} else if ( "Dict".equals( prefix )) {
+						Entry<Color, List<String>> closest = closestColor(dictionaryNames, color);
+						if (null != closest) {
+							outputRow[ colIndex ] = closest.getValue().toString();
+						}
+					}
+					if ( loggerInfo.length() > 0) loggerInfo.append( ", " );
+					if ( "".equals( prefix ))
+						loggerInfo.append( col + "=" + outputRow[ colIndex ]);
+					else
+						loggerInfo.append( prefix + PREFIX_DELIM + col + "=" + outputRow[ colIndex ]);
+					break;					
+				}			
+				case "RGB" : 
+				case "R": case "G": case "B": {					
+					if ( "".equals( prefix ) || "Input".equals( prefix )) {
+						outputRow[ colIndex ] = data[arrayPosition(headers, Col.RGB.getName())];
+					} else if ( "Dict".equals( prefix )) {
+						Entry<Color, List<String>> closest = closestColor(dictionaryNames, color);
+						if (null != closest) {
+							outputRow[ colIndex ] = ColorUtils.toRGB(closest.getKey());
+						}
+					}
+					switch ( col ) {
+						case "R": outputRow[ colIndex ] = outputRow[ colIndex ].substring(0,2); break;
+						case "G": outputRow[ colIndex ] = outputRow[ colIndex ].substring(2,4); break;
+						case "B": outputRow[ colIndex ] = outputRow[ colIndex ].substring(4); break;
+					}
+					if ( loggerInfo.length() > 0) loggerInfo.append( ", " );
+					loggerInfo.append( col + "=" + outputRow[ colIndex ]);
+					break;					
+				}
+				case "HSL" : 
+				case "H" :	case "S" :	case "L" : { 
+					if ( "".equals( prefix ) || "Input".equals( prefix )) {
+						int position = arrayPosition(headers, Col.HSL.getName());
+						if ( -1 != position ) {
+							outputRow[ colIndex ] = data[ position ];							
+						} else {
+							position = arrayPosition(headers, Col.RGB.getName());
+							if ( -1 != position ) {
+								// HSL calculated from RGB
+								outputRow[ colIndex ] = HSLColor.toString( ColorUtils.toColor(data[arrayPosition(headers, Col.RGB.getName())]) );
+							}
+						}
+					} else if ( "Dict".equals( prefix )) {
+						Entry<Color, List<String>> closest = closestColor(dictionaryNames, color);
+						if (null != closest) {
+							outputRow[ colIndex ] = HSLColor.toString(closest.getKey());
+						}
+					}
+					switch ( col ) {
+						case "H": outputRow[ colIndex ] = outputRow[ colIndex ].substring(0,3); break;
+						case "S": outputRow[ colIndex ] = outputRow[ colIndex ].substring(3,6); break;
+						case "L": outputRow[ colIndex ] = outputRow[ colIndex ].substring(6); break;
+					}
+					if ( loggerInfo.length() > 0) loggerInfo.append( ", " );
+					loggerInfo.append( col + "=" + outputRow[ colIndex ]);
+					break;					
+				}
+				case "Type" : {
+					outputRow[ colIndex ] = data[arrayPosition(headers, Col.TYPE.getName())];
+					break;					
+				}			
+				default: LOGGER.error( "Unknown column name " + col );
+			}
+            colIndex++;
+		}
+		for( int i = 0; i < outputRow.length; i++) {
+			
+		}
+		outputData.add( outputRow );
+		LOGGER.info( loggerInfo.toString() );
+	}
+	
+	/** Output data to file. */
+	public static void outputData( List<String[]> outputData, String[] cols, BufferedWriter writer) throws IOException{
+//		int nameCol = arrayPosition(cols, Col.NAME.getName());
+//		int longestName = -1;
+//		if ( -1 != nameCol ) {
+//			longestName = longestString( outputData, nameCol );
+//		}
+//		int dictNameCol = arrayPosition(cols, Col.DICT + PREFIX_DELIM + Col.NAME.getName());
+//		int longestDictName = -1;
+//		if ( -1 != dictNameCol ) {
+//			longestDictName = longestString( outputData, dictNameCol );
+//		}
+//
+//		// Build a format string
+//		String format = "%-40s%s%s%s";
+		// Output column names
+		for( int i = 0; i < cols.length; i++ ) {
+			if ( i > 0 ) writer.write( "," );
+			writer.write( cols[ i ] );
+		}
+		writer.write( NL );
+		// Output column data
+		for ( String[] data : outputData ) {
+			for( int i = 0; i < data.length; i++ ) {
+				if ( i > 0 ) writer.write( "," );
+				writer.write( data[ i ] );
+			}
+			writer.write( NL );
+			
+		}
+	}
+	
+	/** Given rows of String data, determine the longest string in the given column */
+	public static int longestString( List<String[]> outputData, int col ) {
+		int longest = 0;
+		for ( String[] row : outputData ) {
+			String data = row[ col ];
+			if ( null != data && data.length() > longest)
+				longest = data.length();
+		}
+		return longest;
+	}
 }

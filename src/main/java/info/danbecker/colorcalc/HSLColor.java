@@ -7,11 +7,11 @@ import java.awt.Color;
  * Luminance) values to create a corresponding Color object using the RGB
  * ColorSpace.
  *
- * The HUE is the color, the Saturation is the purity of the color (with respect
- * to grey) and Luminance is the brightness of the color (with respect to black
- * and white)
+ * The HUE is the color (0=red,60=yellow,120=green,180=cyan,240=blue,300=magenta),
+ * the Saturation is the purity of the color (0=gray, 100=pure),
+ * and Luminance is the brightness of the color (0=black and 100=white).
  *
- * The Hue is specified as an angel between 0 - 360 degrees where red is 0,
+ * The Hue is specified as an angle between 0 - 360 degrees where red is 0,
  * green is 120 and blue is 240. In between you have the colors of the rainbow.
  * Saturation is specified as a percentage between 0 - 100 where 100 is fully
  * saturated and 0 approaches gray. Luminance is specified as a percentage
@@ -268,6 +268,22 @@ public class HSLColor {
 			s = (max - min) / (2 - max - min);
 
 		return new float[] { h, s * 100, l * 100 };
+	}
+
+	/**
+	 * Convert a RGB Color to it corresponding HSL value string.
+	 * The string is of the form "012345678" where:
+	 * 012 = hue (0-360)
+	 * 345 = sat (0-100
+	 * 678 = luminance (0-100)
+	 * The numbers are zero padded to always be 3 digits.
+	 * 
+	 * @return a string containing the 3 HSL values.
+	 */
+	public static String toString(Color color) {
+		float [] hsl = HSLColor.fromRGB( color );
+		return String.format("%03d%03d%03d", 
+		   Float.valueOf(hsl[ 0 ]).intValue(), Float.valueOf(hsl[ 1 ]).intValue(), Float.valueOf(hsl[ 2 ]).intValue() );
 	}
 
 	/**
