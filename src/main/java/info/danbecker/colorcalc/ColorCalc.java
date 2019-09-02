@@ -31,14 +31,18 @@ import org.apache.commons.cli.ParseException;
  * <p>
  * A tool for calculating color values, sorting, grouping, and naming colors
  * <p>
+ * <pre>
  * Example command line "java ColorCalc -i file1.txt,C:\\Users\\dan\\file2.txt -o output.txt"
  * -i  C:\\Users\\dan\\ArmyPainterDictionary.txt
  * -o C:\\Users\\dan\\output.txt
  * -d C:\\Users\\dan\\PrimarySecondaryTertiaryDictionary.txt
  * -c Name,RGB,HSL,Dict-Name,Dict-RGB,Dict-HSL
  * -s Dict-H--,Name
+ * -t
+ * </pre>
+ * <p>
+ * The sort will sort colors by dictionary hues (descending) and color name (ascending)
  * 
- * The sort will sort colors by diction names (descending) and color name (ascending)
  * 
  * @author <a href="mailto://dan@danbecker.info>Dan Becker</a>
  */
@@ -58,6 +62,7 @@ public class ColorCalc {
     protected static String[] dicts;
     protected static String[] sorts;
     protected static String[] cols;
+    protected static boolean table;
 
     // program data
     protected static Map<Color,List<String>> dictionaryNames = new HashMap<>(); 
@@ -91,6 +96,7 @@ public class ColorCalc {
 		}
 		
 		// Iterate over given input files.
+		final int[] inputLines = new int[] {0}; // Use final for anonymous scope.
 		if ( null != ins ) {
 			for ( String in: ins) {
 				LOGGER.info( "input=" + Paths.get(in).toString());
@@ -99,7 +105,15 @@ public class ColorCalc {
 						try {
 							if ( line.startsWith("#")) {
 								LOGGER.debug("comment=" + line);
-								writer.write( line + NL);
+								if (!table) {
+									writer.write( line + NL);
+								} else {
+									if ( 0 == inputLines[0] ) {
+										HTMLUtils.start( writer, line );
+									} else {
+										HTMLUtils.comment(writer, line);
+									}
+								}
 							} else {
 								// Process line
 								@SuppressWarnings("resource")
@@ -115,6 +129,7 @@ public class ColorCalc {
 								}
 								scanner.close();
 							}
+							inputLines[0]++;
 						} catch( IOException e) {
 							LOGGER.error( "write exception", e);
 						}
@@ -132,6 +147,9 @@ public class ColorCalc {
 		outputData( outputData, cols, writer );
 		
 		if ( null != writer ) {
+			if ( table ) {
+				HTMLUtils.end( writer );
+			}
 			writer.close();
 		}
 	}
@@ -147,6 +165,7 @@ public class ColorCalc {
         options.addOption("o", "out", true, "generated output file with results");
         options.addOption("s", "sorts", true, "column sort fields (followed by + or - for ascending, descending)");
         options.addOption("c", "cols", true, "column output fields");
+        options.addOption("t", "table", false, "output a colorful HTML table"); // switch option
 
 		CommandLineParser cliParser = new DefaultParser();
 		CommandLine line = cliParser.parse(options, args);
@@ -182,6 +201,10 @@ public class ColorCalc {
             String option = line.getOptionValue("cols");
             cols = option.split(CMD_DELIM);
             LOGGER.info("cols=" + Arrays.toString( cols ));
+        }
+        if (line.hasOption("t")) {
+            table = true;
+            LOGGER.info("table=" + table );
         }
 	}
 	
@@ -402,21 +425,30 @@ public class ColorCalc {
 //		// Build a format string
 //		String format = "%-40s%s%s%s";
 		// Output column names
-		for( int i = 0; i < cols.length; i++ ) {
-			if ( i > 0 ) writer.write( "," );
-			writer.write( cols[ i ] );
-		}
-		writer.write( NL );
-		// Output column data
-		for ( String[] data : outputData ) {
-			for( int i = 0; i < data.length; i++ ) {
-				if ( i > 0 ) writer.write( "," );
-				if ( null != data[ i ]) {
-					writer.write( data[ i ] );
-				}
+		if (!table) {
+			for (int i = 0; i < cols.length; i++) {
+				if (i > 0) writer.write(",");
+				writer.write(cols[i]);
 			}
-			writer.write( NL );
-			
+			writer.write(NL);
+		} else {
+			HTMLUtils.header(writer, cols);
+		}
+		// Output column data
+		if (!table) {
+			for (String[] data : outputData) {
+				for (int i = 0; i < data.length; i++) {
+					if (i > 0)	writer.write(",");
+					if (null != data[i]) {
+						writer.write(data[i]);
+					}
+				}
+				writer.write(NL);
+			}
+		} else {
+			for (String[] data : outputData) {
+				HTMLUtils.data(writer, cols, data);
+			}
 		}
 	}
 	

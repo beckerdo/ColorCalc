@@ -10,12 +10,13 @@ public enum Col {
 	HSL( "HSL", "hsl" ),
 	H( "Hue", "h" ),
 	S( "Sat", "s" ),
-	L( "Light", "l" ),
+	L( "Lum", "l" ),
 	SORT( "Sort", "sort" ),
 	COLS( "Cols", "cols" ),
 	INPUT( "Input", "i" ),
-	OUTPUT( "Output", "i" ),
-	DICT( "Dict", "d" );
+	OUTPUT( "Output", "o" ),
+	DICT( "Dict", "d" ),
+	TABLE( "Table", "t" );
 
 	String name;
 	String abbreviation;
@@ -50,6 +51,7 @@ public enum Col {
         		case "i": colName = Col.INPUT; break;
         		case "o": colName = Col.OUTPUT; break;
         		case "d": colName = Col.DICT; break;
+        		case "t": colName = Col.TABLE; break;
             }        	
         }
         return colName;

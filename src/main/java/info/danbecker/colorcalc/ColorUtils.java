@@ -16,12 +16,12 @@ public class ColorUtils {
 	public static Color toColor(String colorString) {
 		if (null == colorString)
 			return null;
+		colorString = colorString.trim();
 		if (colorString.startsWith("#")) {
-			String rgbHex = colorString.substring("#".length());
-			return new Color(Integer.parseInt(rgbHex.substring(0, 2), 16), Integer.parseInt(rgbHex.substring(2, 4), 16),
-					Integer.parseInt(rgbHex.substring(4), 16), 255);
+			colorString = colorString.substring("#".length());
 		}
-		return null;
+		return new Color(Integer.parseInt(colorString.substring(0, 2), 16), Integer.parseInt(colorString.substring(2, 4), 16),
+				Integer.parseInt(colorString.substring(4), 16), 255);
 	}
 
 	/** Return an Color as RGB hex string or "null" */
