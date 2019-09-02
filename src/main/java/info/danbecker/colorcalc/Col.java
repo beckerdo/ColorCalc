@@ -11,7 +11,6 @@ public enum Col {
 	H( "Hue", "h" ),
 	S( "Sat", "s" ),
 	L( "Light", "l" ),
-	TYPE( "Type", "type" ),
 	SORT( "Sort", "sort" ),
 	COLS( "Cols", "cols" ),
 	INPUT( "Input", "i" ),
@@ -46,7 +45,6 @@ public enum Col {
         		case "h": colName = Col.H; break;
         		case "s": colName = Col.S; break;
         		case "l": colName = Col.L; break;
-        		case "type": colName = Col.TYPE; break;
         		case "sort": colName = Col.SORT; break;
         		case "cols": colName = Col.COLS; break;
         		case "i": colName = Col.INPUT; break;

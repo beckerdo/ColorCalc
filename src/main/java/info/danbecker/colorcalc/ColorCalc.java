@@ -6,9 +6,10 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -35,7 +36,9 @@ import org.apache.commons.cli.ParseException;
  * -o C:\\Users\\dan\\output.txt
  * -d C:\\Users\\dan\\PrimarySecondaryTertiaryDictionary.txt
  * -c Name,RGB,HSL,Dict-Name,Dict-RGB,Dict-HSL
- * -s Dict-H,Dict-L,Name
+ * -s Dict-H--,Name
+ * 
+ * The sort will sort colors by diction names (descending) and color name (ascending)
  * 
  * @author <a href="mailto://dan@danbecker.info>Dan Becker</a>
  */
@@ -120,7 +123,10 @@ public class ColorCalc {
 			}
 		}
 		
-		// Sort outputData here
+		// Sort outputData
+		if ( null != sorts ) {
+			sortData( outputData, new ColorFieldComparator( cols, sorts ) );
+		}
 		
 		// Put all output data to file
 		outputData( outputData, cols, writer );
@@ -306,7 +312,8 @@ public class ColorCalc {
 				case "RGB" : 
 				case "R": case "G": case "B": {					
 					if ( "".equals( prefix ) || "Input".equals( prefix )) {
-						outputRow[ colIndex ] = data[arrayPosition(headers, Col.RGB.getName())];
+						// Normalize output (might get rid of #)
+						outputRow[ colIndex ] = ColorUtils.toRGB(ColorUtils.toColor(data[arrayPosition(headers, Col.RGB.getName())]));
 					} else if ( "Dict".equals( prefix )) {
 						Entry<Color, List<String>> closest = closestColor(dictionaryNames, color);
 						if (null != closest) {
@@ -327,6 +334,7 @@ public class ColorCalc {
 					if ( "".equals( prefix ) || "Input".equals( prefix )) {
 						int position = arrayPosition(headers, Col.HSL.getName());
 						if ( -1 != position ) {
+							// Should normalize output, but what is the String representation of HSL?
 							outputRow[ colIndex ] = data[ position ];							
 						} else {
 							position = arrayPosition(headers, Col.RGB.getName());
@@ -350,22 +358,35 @@ public class ColorCalc {
 					loggerInfo.append( col + "=" + outputRow[ colIndex ]);
 					break;					
 				}
-				case "Type" : {
-					outputRow[ colIndex ] = data[arrayPosition(headers, Col.TYPE.getName())];
-					break;					
-				}			
-				default: LOGGER.error( "Unknown column name " + col );
+				default: {
+					// Copy other columns without processing
+					int position = arrayPosition(headers, col );
+					if ( -1 != position ) {
+						if ( position >= data.length ) {
+							// Might be the last column with no data.
+							outputRow[ colIndex ] = null;
+						} else {
+							outputRow[ colIndex ] = data[ position ];
+						}
+					} else {
+						LOGGER.error( "Unknown column name " + col );
+					}
+				}
 			}
             colIndex++;
-		}
-		for( int i = 0; i < outputRow.length; i++) {
-			
 		}
 		outputData.add( outputRow );
 		LOGGER.info( loggerInfo.toString() );
 	}
+
+	// Sort data according to the names columns
+	public static void sortData( List<String[]> outputData, Comparator<String[]> colorFieldComparator) {
+		 Collections.sort(outputData,  colorFieldComparator );
+	}
 	
-	/** Output data to file. */
+	/** Output data to file. 
+	 * TODO: Support spacing/tabbing to make nice columns in text file
+	 */
 	public static void outputData( List<String[]> outputData, String[] cols, BufferedWriter writer) throws IOException{
 //		int nameCol = arrayPosition(cols, Col.NAME.getName());
 //		int longestName = -1;
@@ -390,7 +411,9 @@ public class ColorCalc {
 		for ( String[] data : outputData ) {
 			for( int i = 0; i < data.length; i++ ) {
 				if ( i > 0 ) writer.write( "," );
-				writer.write( data[ i ] );
+				if ( null != data[ i ]) {
+					writer.write( data[ i ] );
+				}
 			}
 			writer.write( NL );
 			
