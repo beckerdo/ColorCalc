@@ -18,9 +18,21 @@ public class HTMLUtils {
 			org.slf4j.LoggerFactory.getLogger(HTMLUtils.class);
 
 	public static void start( Writer writer, String line ) throws IOException {
+		if ( null == line ) {
+			line = "";
+		}
+		if ( line.startsWith("# ")) {
+			line = line.substring( 2 );
+		}
+		if ( line.startsWith("#")) {
+			line = line.substring( 1 );
+		}
+		
 		writer.write("<!DOCTYPE html>");
 		writer.write(NL);
 		writer.write("<html>");
+		writer.write(NL);
+		writer.write("<head><title>" + line + "</title></head>");
 		writer.write(NL);
 		writer.write("<body>");
 		writer.write(NL);
@@ -33,6 +45,16 @@ public class HTMLUtils {
 	}
 
 	public static void comment( Writer writer, String line ) throws IOException {
+		if ( null == line ) {
+			line = "";
+		}
+		if ( line.startsWith("# ")) {
+			line = line.substring( 2 );
+		}
+		if ( line.startsWith("#")) {
+			line = line.substring( 1 );
+		}
+		
 		writer.write("<tr><td colspan=\"100\">" + line + "</td></tr>");
 		writer.write(NL);
 	}

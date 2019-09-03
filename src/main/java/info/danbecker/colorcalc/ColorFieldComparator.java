@@ -83,7 +83,6 @@ public class ColorFieldComparator implements Comparator<String[]> {
 				}
 			}
 		}
-		
 	    return 0;
     }
 }

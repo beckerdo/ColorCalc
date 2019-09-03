@@ -50,16 +50,40 @@ public class ColorUtils {
 
 	/**
 	 * Return distance between two colors.
+	 * <p>
+	 * RGB distance from the formula discussed in
+	 * https://en.wikipedia.org/wiki/Color_difference#Euclidean
 	 * 
 	 * @param colorString
 	 * @return distance of RBG or Integer.MAX_VALUE for nulls
 	 */
-	public static double distance(Color color1, Color color2) {
+	public static double distanceWeighted(Color color1, Color color2) {
 		if (null == color1 || null == color2)
 			return Double.MAX_VALUE;
-		int rd = Math.abs(color1.getRed() - color2.getRed());
-		int gd = Math.abs(color1.getGreen() - color2.getGreen());
-		int bd = Math.abs(color1.getBlue() - color2.getBlue());
-		return Math.sqrt(rd * rd + gd * gd + bd * bd);
+		double rbar = ( color1.getRed() + color2.getRed() ) / 2.0;
+		// Squared distances
+		int ΔR2 =  ( color1.getRed() - color2.getRed() ) * ( color1.getRed() - color2.getRed() );
+		int ΔG2 =  ( color1.getGreen() - color2.getGreen() ) * ( color1.getGreen() - color2.getGreen() );
+		int ΔB2 =  ( color1.getBlue() - color2.getBlue() ) * ( color1.getBlue() - color2.getBlue() );
+		return Math.sqrt((2.0 + rbar/256.0) * ΔR2 + 4.0 * ΔG2 + (2.0 + (255.0-rbar)/256.0) * ΔB2 );
+	}
+	
+	/**
+	 * Return distance between two colors.
+	 * <p>
+	 * RGB distance from the formula discussed in
+	 * https://en.wikipedia.org/wiki/Color_difference#Euclidean
+	 * 
+	 * @param colorString
+	 * @return distance of RBG or Integer.MAX_VALUE for nulls
+	 */
+	public static double distanceEuclidean(Color color1, Color color2) {
+		if (null == color1 || null == color2)
+			return Double.MAX_VALUE;
+		// Squared distances
+		int ΔR2 =  ( color1.getRed() - color2.getRed() ) * ( color1.getRed() - color2.getRed() );
+		int ΔG2 =  ( color1.getGreen() - color2.getGreen() ) * ( color1.getGreen() - color2.getGreen() );
+		int ΔB2 =  ( color1.getBlue() - color2.getBlue() ) * ( color1.getBlue() - color2.getBlue() );
+		return Math.sqrt( ΔR2 + ΔG2 + ΔB2 );
 	}
 }

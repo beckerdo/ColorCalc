@@ -33,16 +33,18 @@ import org.apache.commons.cli.ParseException;
  * <p>
  * <pre>
  * Example command line "java ColorCalc -i file1.txt,C:\\Users\\dan\\file2.txt -o output.txt"
- * -i  C:\\Users\\dan\\ArmyPainterDictionary.txt
+ * -i C:\\Users\\dan\\ArmyPainterDictionary.txt
  * -o C:\\Users\\dan\\output.txt
  * -d C:\\Users\\dan\\PrimarySecondaryTertiaryDictionary.txt
- * -c Name,RGB,HSL,Dict-Name,Dict-RGB,Dict-HSL
+ * -c Name,RGB,HSL,S,Dict-Name,Dict-RGB,Dict-HSL
  * -s Dict-H--,Name
  * -t
+ * -g S<<013 
+ * -r "Colors grouped by major color, low saturation moved to end"
  * </pre>
  * <p>
- * The sort will sort colors by dictionary hues (descending) and color name (ascending)
- * 
+ * The sort will sort colors by dictionary hues (descending) and color name (ascending).
+ * The low saturation colors (S<<013) are grouped to the end.
  * 
  * @author <a href="mailto://dan@danbecker.info>Dan Becker</a>
  */
@@ -61,8 +63,10 @@ public class ColorCalc {
     protected static String out;
     protected static String[] dicts;
     protected static String[] sorts;
+    protected static String[] groups;
     protected static String[] cols;
     protected static boolean table;
+    protected static String comment;
 
     // program data
     protected static Map<Color,List<String>> dictionaryNames = new HashMap<>(); 
@@ -78,6 +82,12 @@ public class ColorCalc {
 		
 		// Open output file.
 		if ( null != out) {
+			if ( table ) {
+				if ( out.endsWith(".txt")) {
+					out = out.substring(0, out.length() - 4 );
+					out = out + ".html";
+				}
+			}
 			LOGGER.info( "output=" + out);
 			writer =  new BufferedWriter(new FileWriter(out));
 		}
@@ -96,7 +106,7 @@ public class ColorCalc {
 		}
 		
 		// Iterate over given input files.
-		final int[] inputLines = new int[] {0}; // Use final for anonymous scope.
+		final int[] inputLineCount = new int[] {0}; // Use final for anonymous scope.
 		if ( null != ins ) {
 			for ( String in: ins) {
 				LOGGER.info( "input=" + Paths.get(in).toString());
@@ -107,9 +117,15 @@ public class ColorCalc {
 								LOGGER.debug("comment=" + line);
 								if (!table) {
 									writer.write( line + NL);
+									if ( 0 == inputLineCount[0] ) {
+										writer.write( "# " + comment + NL);
+									}
 								} else {
-									if ( 0 == inputLines[0] ) {
+									if ( 0 == inputLineCount[0] ) {
 										HTMLUtils.start( writer, line );
+										if ( null != comment ) {
+											HTMLUtils.comment(writer, comment);											
+										}
 									} else {
 										HTMLUtils.comment(writer, line);
 									}
@@ -129,7 +145,7 @@ public class ColorCalc {
 								}
 								scanner.close();
 							}
-							inputLines[0]++;
+							inputLineCount[0]++;
 						} catch( IOException e) {
 							LOGGER.error( "write exception", e);
 						}
@@ -138,9 +154,13 @@ public class ColorCalc {
 			}
 		}
 		
-		// Sort outputData
+		// Sort output data
 		if ( null != sorts ) {
 			sortData( outputData, new ColorFieldComparator( cols, sorts ) );
+		}
+		// Move groups to end of data.
+		if ( null != groups ) {
+			sortData( outputData, new GroupComparator( cols, groups ) );
 		}
 		
 		// Put all output data to file
@@ -164,8 +184,10 @@ public class ColorCalc {
         options.addOption("d", "dicts", true, "list of comma-separated dictionary files for comparisons");
         options.addOption("o", "out", true, "generated output file with results");
         options.addOption("s", "sorts", true, "column sort fields (followed by + or - for ascending, descending)");
+        options.addOption("g", "groups", true, "column sort fields ");
         options.addOption("c", "cols", true, "column output fields");
         options.addOption("t", "table", false, "output a colorful HTML table"); // switch option
+        options.addOption("r", "comment", true, "output file comment (remark)");
 
 		CommandLineParser cliParser = new DefaultParser();
 		CommandLine line = cliParser.parse(options, args);
@@ -197,6 +219,11 @@ public class ColorCalc {
             sorts = option.split(CMD_DELIM);
             LOGGER.info("sorts=" + Arrays.toString( sorts ));
         }
+        if (line.hasOption("g")) {
+            String option = line.getOptionValue("groups");
+            groups = option.split(CMD_DELIM);
+            LOGGER.info("groups=" + Arrays.toString( groups ));
+        }
         if (line.hasOption("c")) {
             String option = line.getOptionValue("cols");
             cols = option.split(CMD_DELIM);
@@ -205,6 +232,10 @@ public class ColorCalc {
         if (line.hasOption("t")) {
             table = true;
             LOGGER.info("table=" + table );
+        }
+        if (line.hasOption("r")) {
+            comment = line.getOptionValue("comment");
+            LOGGER.info("comment=" + comment );
         }
 	}
 	
@@ -280,7 +311,8 @@ public class ColorCalc {
 
 		for ( Entry<Color,List<String>> entry: colorEntries) {
 			Color colorEntry = entry.getKey();
-			double distance = ColorUtils.distance( color, colorEntry);
+			double distance = ColorUtils.distanceEuclidean( color, colorEntry);
+			// double distance = ColorUtils.distanceWeighted( color, colorEntry);
 			if ( distance < minDist) {
 				minDist = distance;
 				closest = entry;
