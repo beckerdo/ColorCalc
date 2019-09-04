@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import java.awt.Color;
+import java.awt.Dimension;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -33,14 +34,15 @@ import org.apache.commons.cli.ParseException;
  * <p>
  * <pre>
  * Example command line "java ColorCalc -i file1.txt,C:\\Users\\dan\\file2.txt -o output.txt"
- * -i C:\\Users\\dan\\ArmyPainterDictionary.txt
- * -o C:\\Users\\dan\\output.txt
- * -d C:\\Users\\dan\\PrimarySecondaryTertiaryDictionary.txt
+ * -i C:\\ArmyPainterDictionary.txt
+ * -o C:\\output.txt
+ * -d C:\\PrimarySecondaryTertiaryDictionary.txt
  * -c Name,RGB,HSL,S,Dict-Name,Dict-RGB,Dict-HSL
  * -s Dict-H--,Name
  * -t
  * -g S<<013 
  * -r "Colors grouped by major color, low saturation moved to end"
+ * -o C:\\colorPlot.png
  * </pre>
  * <p>
  * The sort will sort colors by dictionary hues (descending) and color name (ascending).
@@ -67,6 +69,7 @@ public class ColorCalc {
     protected static String[] cols;
     protected static boolean table;
     protected static String comment;
+    protected static String plotName;
 
     // program data
     protected static Map<Color,List<String>> dictionaryNames = new HashMap<>(); 
@@ -162,7 +165,13 @@ public class ColorCalc {
 		if ( null != groups ) {
 			sortData( outputData, new GroupComparator( cols, groups ) );
 		}
-		
+
+		// Draw a pretty picture
+		if ( null != plotName ) {
+			Dimension size = new Dimension( 800, 800 );
+			PlotRenderer.writeImage( PlotRenderer.renderImage( size, outputData, cols ), plotName );
+		}
+
 		// Put all output data to file
 		outputData( outputData, cols, writer );
 		
@@ -187,6 +196,7 @@ public class ColorCalc {
         options.addOption("g", "groups", true, "column sort fields ");
         options.addOption("c", "cols", true, "column output fields");
         options.addOption("t", "table", false, "output a colorful HTML table"); // switch option
+        options.addOption("p", "plot", true, "output a plot of the colors to the given file");
         options.addOption("r", "comment", true, "output file comment (remark)");
 
 		CommandLineParser cliParser = new DefaultParser();
@@ -236,6 +246,10 @@ public class ColorCalc {
         if (line.hasOption("r")) {
             comment = line.getOptionValue("comment");
             LOGGER.info("comment=" + comment );
+        }
+        if (line.hasOption("p")) {
+            plotName = line.getOptionValue("plot");
+            LOGGER.info("plot=" + plotName );
         }
 	}
 	
@@ -493,5 +507,5 @@ public class ColorCalc {
 				longest = data.length();
 		}
 		return longest;
-	}
+	}		
 }

@@ -401,4 +401,23 @@ public class HSLColor {
 
 		return p;
 	}
+
+	/** 
+	 * Parse HSL from String of the form HHHSSSLLL where
+	 * HHH is hue in range 0..360
+	 * SSS is saturation in range 0..100
+	 * LLL is luminance in range 0..100
+	 * @param nineDigits
+	 * @return
+	 */
+	public static final HSLColor fromString( String nineDigits) {
+		if ( null == nineDigits || nineDigits.length() < 9 ) {
+			throw new IllegalArgumentException ( "String \"" + "\" should be of form HHHSSSLLL" );
+		}
+		return new HSLColor( (float) Integer.parseInt( nineDigits.substring(0,3)),
+				Integer.parseInt( nineDigits.substring(3,6)),
+				Integer.parseInt( nineDigits.substring(6))
+				);
+	}
+
 }
