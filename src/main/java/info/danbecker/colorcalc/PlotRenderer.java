@@ -3,21 +3,16 @@ package info.danbecker.colorcalc;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
-import java.awt.Insets;
 import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Shape;
-import java.awt.font.TextLayout;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -53,7 +48,7 @@ public class PlotRenderer {
 	    bufferedImage = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_ARGB);		
 	}
 
-    /** Writes the image to a file name of "<export.path>/frets<entryDetails>,<fileCount>.png" */
+    /** Writes the image to the given fileName. */
 	public static String writeImage(BufferedImage image, String fileName ) 
 		throws IOException {
 		ImageIO.write(image, "png", new File( fileName  ));
@@ -70,18 +65,17 @@ public class PlotRenderer {
 		PlotRenderer rr = new PlotRenderer( size );
 	    Graphics2D g2d = rr.bufferedImage.createGraphics();
 	    g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
-	    g2d.setRenderingHint( RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_SPEED );
+	    g2d.setRenderingHint( RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY );
 	    
 	    // Make image background.
-	    Color transparent = new Color(0, true);
+	    Color transparent = new Color(0x00FFFF00, true);
 	    g2d.setColor( transparent ); // can have alpha
 	    g2d.fillRect(0, 0, size.width, size.height);
-	    // paintGradient( g2d, orientVert, orientHor, fretMinStringMin, fretMaxStringMax, colors );
 	    
 	    // Make plot background.
 	    int borderWidth = 4;
 	    g2d.setStroke( new BasicStroke ( borderWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND ) );
-	    Color plotBackground = changeAlpha( Color.DARK_GRAY, 255/4 ); // ghosted gray 
+	    Color plotBackground = changeAlpha( Color.BLACK, 2 * 255 / 4 ); // ghosted gray 
     	g2d.setColor( plotBackground );
 		g2d.fillOval( borderWidth/2, borderWidth/2, size.width - borderWidth, size.height - borderWidth); // x, y, width, height
 	    Color boundary = Color.BLACK;
