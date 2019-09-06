@@ -16,6 +16,14 @@
 		</contributor>
 	</contributors>
 
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<version.colorcalc>${project.version}</version.colorcalc>
+		<version.java.source>1.8</version.java.source>
+		<version.java.target>1.8</version.java.target>
+		<version.libs.junit>4.12</version.libs.junit>
+	</properties>
+
 	<dependencies>
 		<!-- Utilities -->
 		<dependency>
@@ -24,6 +32,11 @@
 			<artifactId>commons-cli</artifactId>
 			<version>1.4</version>
 		</dependency>
+		<dependency>
+    		<groupId>org.jzy3d</groupId>
+    		<artifactId>jzy3d-api</artifactId>
+    		<version>1.0.3-SNAPSHOT</version>
+		</dependency>        
   		<!--  Logging --> 
 		<dependency> 
   			<groupId>org.slf4j</groupId>
