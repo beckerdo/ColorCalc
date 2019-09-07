@@ -24,6 +24,7 @@ import javax.imageio.stream.ImageOutputStream;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
 import org.apache.commons.cli.CommandLine;
@@ -48,7 +49,8 @@ import org.apache.commons.cli.ParseException;
  * -t
  * -g S<<013 
  * -r "Colors grouped by major color, low saturation moved to end"
- * -o C:\\colorPlot.png
+ * -p C:\\colorPlot.png
+ * -v
  * </pre>
  * <p>
  * The sort will sort colors by dictionary hues (descending) and color name (ascending).
@@ -76,6 +78,7 @@ public class ColorCalc {
     protected static boolean table;
     protected static String comment;
     protected static String plotName;
+    protected static boolean visualize;
 
     // program data
     protected static Map<Color,List<String>> dictionaryNames = new HashMap<>(); 
@@ -182,7 +185,13 @@ public class ColorCalc {
 		outputData( outputData, cols, writer );
 
 		// Multiple fileName#.png made into fileName.gif
+		// Not sure whether to use the PlotRenderer or the Visualize to contain this.
 		// animatedGIF( "C:\\Users\\dan\\Dropbox\\games\\ArmyPainter\\ColorPlot" );
+		
+		// An interactive panel that shows/animates a 3D scatter chart using JXY3D library.
+		if ( visualize ) {
+			visualizeData( outputData, cols );
+		}
 		
 		if ( null != writer ) {
 			if ( table ) {
@@ -207,6 +216,7 @@ public class ColorCalc {
         options.addOption("t", "table", false, "output a colorful HTML table"); // switch option
         options.addOption("p", "plot", true, "output a plot of the colors to the given file");
         options.addOption("r", "comment", true, "output file comment (remark)");
+        options.addOption("v", "visualize", false, "open interactive window with 3D plot"); // switch option
 
 		CommandLineParser cliParser = new DefaultParser();
 		CommandLine line = cliParser.parse(options, args);
@@ -259,6 +269,10 @@ public class ColorCalc {
         if (line.hasOption("p")) {
             plotName = line.getOptionValue("plot");
             LOGGER.info("plot=" + plotName );
+        }
+        if (line.hasOption("v")) {
+            visualize = true;
+            LOGGER.info("visualize=" + visualize );
         }
 	}
 	
@@ -568,4 +582,17 @@ public class ColorCalc {
 		writer.close();
 		output.close();
 	}
+
+	/**
+	 * An interactive panel that shows/animates a 3D scatter chart using JXY3D library.
+	 * 
+	 * @param outputData
+	 * @param cols
+	 */
+	public static void visualizeData( final List<String[]> data, final String [] cols ) throws Exception {
+		Visualize visualize = new Visualize( data, cols );
+		visualize.launch( true, new Rectangle( 200, 200, 1000, 800) ); // launch interactive or static with given size
+	}
+	
+
 }

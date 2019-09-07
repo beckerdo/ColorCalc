@@ -1,5 +1,6 @@
 package info.danbecker.colorcalc.demo;
 
+import java.io.IOException;
 import java.util.Random;
 
 import org.jzy3d.analysis.AbstractAnalysis;
@@ -9,8 +10,11 @@ import org.jzy3d.chart.factories.AWTChartComponentFactory;
 import org.jzy3d.colors.Color;
 import org.jzy3d.maths.Coord3d;
 import org.jzy3d.plot3d.primitives.Scatter;
+import org.jzy3d.plot3d.rendering.canvas.ICanvas;
 import org.jzy3d.plot3d.rendering.canvas.Quality;
 import org.jzy3d.plot3d.rendering.view.View;
+
+import com.jogamp.opengl.util.texture.TextureData;
 
 /**
  * A demonstration of a 3D scatter chart using JXY3D library.
@@ -26,15 +30,13 @@ public class ScatterDemo extends AbstractAnalysis {
 	}
 		
 	@Override
-    public void init(){
+    public void init() throws IOException {
         // int size = 500000;
-        int dataSize = 1000;
-        
+        int dataSize = 1000;       
         Coord3d[] points = new Coord3d[dataSize];
         Color[]   colors = new Color[dataSize];
         
         Random r = new Random();
-        r.setSeed(0);
         
         for(int i=0; i<dataSize; i++){
             float x = r.nextFloat() - 0.5f;
@@ -51,7 +53,6 @@ public class ScatterDemo extends AbstractAnalysis {
         // chart = AWTChartComponentFactory.chart(Quality.Advanced, "newt");
         chart = AWTChartComponentFactory.chart(Quality.Nicest, "newt"); // awt, newt, offscreen
         View view = chart.getView();	        
-        LOGGER.info( "View 1=" + view.getViewPoint().toString() );
         // When using polar mode, x reps azimuth (radians), y reps elevation, and z reps range.
         Coord3d viewPoint = new Coord3d( 2.0*Math.PI/8.0, 0.5, 1.5 );
         view.setViewPoint(viewPoint);
@@ -59,6 +60,8 @@ public class ScatterDemo extends AbstractAnalysis {
 	    ChartScene scene = chart.getScene();
         scene.add(scatter);
 
-        LOGGER.info( "View 2=" + view.getViewPoint().toString() );
+        // Determin canvas type for later use.
+        ICanvas canvas = chart.getCanvas();
+        LOGGER.info( "ICanvas=" + canvas );
     }
 }
