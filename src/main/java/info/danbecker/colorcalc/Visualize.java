@@ -1,21 +1,22 @@
 package info.danbecker.colorcalc;
 
 import java.awt.Rectangle;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.jzy3d.analysis.AbstractAnalysis;
 import org.jzy3d.analysis.AnalysisLauncher;
+import org.jzy3d.chart.ChartLauncher;
 import org.jzy3d.chart.ChartScene;
 import org.jzy3d.chart.factories.AWTChartComponentFactory;
 import org.jzy3d.colors.Color;
 import org.jzy3d.maths.Coord3d;
 import org.jzy3d.plot3d.primitives.Scatter;
+import org.jzy3d.plot3d.primitives.axes.layout.IAxeLayout;
 import org.jzy3d.plot3d.rendering.canvas.ICanvas;
 import org.jzy3d.plot3d.rendering.canvas.Quality;
 import org.jzy3d.plot3d.rendering.view.View;
-
-import com.jogamp.opengl.util.texture.TextureData;
 
 /**
  * An interactive panel that shows/animates a 3D scatter chart using JXY3D library.
@@ -58,14 +59,23 @@ public class Visualize extends AbstractAnalysis {
 		if ( null != data ) {
 			this.data = data;	
 			this.cols = cols;
-		} else {
-			// If no colors given, use the basic ones
-			if ( null != BASICS ) {
-				this.data = new LinkedList<String[]>();
-				for ( String basic : BASICS) {
-					this.data.add( new String[] { basic });
+
+			// Add BASICS to data
+			if ( null != cols && null != BASICS ) {
+				for ( int coli = 0; coli < cols.length; coli++) {
+					if (cols[ coli ].equals("RGB") ) {
+						for ( int basici = 0; basici < BASICS.length; basici++) {
+							// java.awt.Color color = ColorUtils.toColor( BASICS[ basici] );
+							List<String> fakeRow = new LinkedList<String>();
+							for ( int y = 0; y < coli; y++)
+								fakeRow.add( "" );
+							fakeRow.add( BASICS[ basici ]);
+							for ( int y = basici+1; y < cols.length; y++ )
+								fakeRow.add( "" );
+							data.add( fakeRow.toArray( new String[ 0 ] ) );
+						}
+					}					
 				}
-				this.cols = new String[] {"RGB"};
 			}
 		}
 	}
@@ -94,6 +104,14 @@ public class Visualize extends AbstractAnalysis {
 			else 
 			    AnalysisLauncher.openStatic(this, rect);			
 		}
+		
+        // Screenshot can be done with AnalysisLauncher.openStatic, basically
+        // Chart chart = demo.getChart();
+        // ChartLauncher.openStaticChart(chart, new org.jzy3d.maths.Rectangle( 0, 0, 800, 800), "Testchart"); // empty
+
+        // LOGGER.info( "TextureData size=" + tData.getWidth() + "," + tData.getHeight());
+        // Data = canvas.screenshot( new File("C:\\Users\\dan\\Dropbox\\games\\ArmyPainter\\Scatter.png"));        
+        ChartLauncher.screenshot(this.getChart(), "C:\\Users\\dan\\Dropbox\\games\\ArmyPainter\\Scatter.png"); // screenshot not available
 	}
 	
 	protected void convertData() {
@@ -110,45 +128,38 @@ public class Visualize extends AbstractAnalysis {
 					
 					if (cols[ coli ].equals("RGB") ) {
 						java.awt.Color color = ColorUtils.toColor( cell );
-						// float [] hslColor = HSLColor.fromRGB(color);
-
-						// For now, xyz = rgb, try hsl
-						points[rowi] = new Coord3d( color.getRed(), color.getGreen(), color.getBlue() );
+						points[ rowi ] = new Coord3d( color.getRed(), color.getGreen(), color.getBlue() );
+						// points[ rowi ] = points[ rowi ].polar(); // Convert RGB to polar 
 						colors[ rowi ] = new Color( color.getRed()/255.0f, color.getGreen()/255.0f, color.getBlue()/255.0f, BLOB_ALPHA);
 					}
-
 				}
 	        }
 		}
 	}
 	
 	@Override
-    public void init() {
+    public void init() throws IOException{
 		convertData();
         Scatter scatter = new Scatter(points, colors);
         scatter.setWidth(BLOB_SIZE); // default is 1.0
         // chart = AWTChartComponentFactory.chart(Quality.Advanced, "newt");
         chart = AWTChartComponentFactory.chart(Quality.Nicest, "newt"); // awt, newt, offscreen
-        View view = chart.getView();	        
-        // When using polar mode, x reps azimuth (radians), y reps elevation, and z reps range.
-        Coord3d viewPoint = new Coord3d( 2.0*Math.PI/8.0, 0.5, 1.5 );
-        view.setViewPoint(viewPoint);
-
 	    ChartScene scene = chart.getScene();
         scene.add(scatter);
 
+        IAxeLayout axeLayout = chart.getAxeLayout();
+        axeLayout.setXAxeLabel( "Red" );
+        axeLayout.setYAxeLabel( "Green" );
+        axeLayout.setZAxeLabel( "Blue" );
+
+        View view = chart.getView();	        
+        // When using polar mode, x reps azimuth (radians), y reps elevation, and z reps range.
+        Coord3d viewPoint = new Coord3d( 5.0*Math.PI/4.0, 0.5, 1.5 ); // 0..2PI
+        view.setViewPoint(viewPoint);
+        
         // Save screenshot
         ICanvas canvas = chart.getCanvas();
         LOGGER.info( "ICanvas=" + canvas );
-        TextureData tData = canvas.screenshot();
-        LOGGER.info( "TextureData screen=" + tData );
         
-        // Screenshot can be done with AnalysisLauncher.openStatic, basically
-        // Chart chart = demo.getChart();
-        // ChartLauncher.openStaticChart(chart, rectangle, demo.getName());
-        // ChartLauncher.screenshot(demo.getChart(), "./data/screenshots/" + demo.getName() + ".png");
-
-        // LOGGER.info( "TextureData size=" + tData.getWidth() + "," + tData.getHeight());
-        // Data = canvas.screenshot( new File("C:\\Users\\dan\\Dropbox\\games\\ArmyPainter\\Scatter.png"));        
     }
 }
