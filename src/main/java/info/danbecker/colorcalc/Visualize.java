@@ -27,7 +27,7 @@ public class Visualize extends AbstractAnalysis {
 	public static final org.slf4j.Logger LOGGER = 
 			org.slf4j.LoggerFactory.getLogger(Visualize.class);
 	
-	public static final float BLOB_SIZE = 10.0f; // Size of scatter plot blob
+	public static final float BLOB_SIZE = 15.0f; // Size of scatter plot blob
 	public static final float BLOB_ALPHA = 0.75f; // Transparency of blob
 	
 	protected List<String[]> data;
@@ -128,8 +128,13 @@ public class Visualize extends AbstractAnalysis {
 					
 					if (cols[ coli ].equals("RGB") ) {
 						java.awt.Color color = ColorUtils.toColor( cell );
-						points[ rowi ] = new Coord3d( color.getRed(), color.getGreen(), color.getBlue() );
-						// points[ rowi ] = points[ rowi ].polar(); // Convert RGB to polar 
+						HSLColor hsl = new HSLColor(color); // hue=0.360,sat=0..100,lum-0..100
+						// Coord3d hsl = new Coord3d( hslColor.getHue() * Math.PI / 180.0, hslColor.getLuminance(), hslColor.getSaturation()); // x reps azimuth (radians 0..2pi), y reps elevation, and z reps range.
+						// Coord3d hslp = new Coord3d( hsl.getHue() * Math.PI / 180.0, Math.atan2(hsl.getLuminance(), hsl.getSaturation()), hsl.getSaturation()); // x reps azimuth (radians 0..2pi), y reps elevation, and z reps range.
+						Coord3d hslp = new Coord3d( hsl.getHue() * Math.PI / 180.0, Math.atan2(hsl.getLuminance(), hsl.getSaturation()), 
+						   Math.sqrt(hsl.getLuminance()*hsl.getLuminance() + hsl.getSaturation()*hsl.getSaturation())); // x reps azimuth (radians 0..2pi), y reps elevation, and z reps range.
+						points[ rowi ] = hslp.cartesian();
+						// points[ rowi ] = new Coord3d( color.getRed(), color.getGreen(), color.getBlue() ); // RGB box
 						colors[ rowi ] = new Color( color.getRed()/255.0f, color.getGreen()/255.0f, color.getBlue()/255.0f, BLOB_ALPHA);
 					}
 				}
@@ -148,9 +153,9 @@ public class Visualize extends AbstractAnalysis {
         scene.add(scatter);
 
         IAxeLayout axeLayout = chart.getAxeLayout();
-        axeLayout.setXAxeLabel( "Red" );
-        axeLayout.setYAxeLabel( "Green" );
-        axeLayout.setZAxeLabel( "Blue" );
+        axeLayout.setXAxeLabel( "Hue/Sat" );
+        axeLayout.setYAxeLabel( "Hue/Sat" );
+        axeLayout.setZAxeLabel( "Lumi" );
 
         View view = chart.getView();	        
         // When using polar mode, x reps azimuth (radians), y reps elevation, and z reps range.
