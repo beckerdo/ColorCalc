@@ -1,0 +1,19 @@
+# Primary (red,green,blue), secondary (yellow,cyan,magenta), and tertiary saturated colors.
+# These colors have been desaturated 50% (closer to gray), resulting in tones.
+# Six hue slices through the HSL color space
+# RGB coded as hexadecimal integers, HSL/HSV coded as decimal integers (degree,percents)
+# https://en.wikipedia.org/wiki/HSL_and_HSV#HSL
+# Other dictionaries http://people.csail.mit.edu/jaffer/Color/Dictionaries.html
+Name				RGB 		HSL			HSV
+Red tone			#BF4040 	000050050	000050100
+Yellow-Red tone		#BF8040 	030050050	030050100
+Yellow tone			#BFBF40 	060050050	060050100
+Green-Yellow tone	#7FBF40 	090050050	090050100
+Green tone			#40BF40 	120050050 	120050100
+Cyan-Green tone		#40BF7F 	150050050 	150050100
+Cyan tone			#40BFBF 	180050050	180050100
+Blue-Cyan tone		#4080BF 	210050050 	210050100
+Blue tone			#4040BF 	240050050 	240050100
+Magenta-Blue tone	#8040BF 	270050050 	270050100
+Magenta tone		#BF40BF 	300050050 	300050100
+Red-Magenta tone	#BF407F 	330050050 	330050100

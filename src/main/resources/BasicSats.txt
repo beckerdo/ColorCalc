@@ -1,0 +1,18 @@
+# Primary (red,green,blue), secondary (yellow,cyan,magenta), and tertiary saturated colors.
+# Six hue slices through the HSL color space
+# RGB coded as hexadecimal integers, HSL/HSV coded as decimal integers (degree,percents)
+# https://en.wikipedia.org/wiki/HSL_and_HSV#HSL
+# Other dictionaries http://people.csail.mit.edu/jaffer/Color/Dictionaries.html
+Name			RGB 		HSL			HSV
+Red				#FF0000 	000100050	000100100
+Yellow-Red		#FF7F00 	030100050	030100100
+Yellow			#FFFF00 	060100050	060100100
+Green-Yellow	#7FFF00 	090100050	090100100
+Green			#00FF00 	120100050 	120100100
+Cyan-Green		#00FF7F 	150100050 	150100100
+Cyan			#00FFFF 	180100050	180100100
+Blue-Cyan		#007FFF 	210100050 	210100100
+Blue			#0000FF 	240100050 	240100100
+Magenta-Blue	#7F00FF 	270100050 	270100100
+Magenta			#FF00FF 	300100050 	300100100
+Red-Magenta		#FF007F 	330100050 	330100100

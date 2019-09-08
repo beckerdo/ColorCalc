@@ -27,6 +27,11 @@ public class Visualize extends AbstractAnalysis {
 	public static final org.slf4j.Logger LOGGER = 
 			org.slf4j.LoggerFactory.getLogger(Visualize.class);
 	
+	// Positions for HSL arrays
+	public static final int HUE = 0;
+	public static final int SAT = 1;
+	public static final int LUM = 2;
+	
 	public static final float BLOB_SIZE = 15.0f; // Size of scatter plot blob
 	public static final float BLOB_ALPHA = 0.75f; // Transparency of blob
 	
@@ -36,47 +41,10 @@ public class Visualize extends AbstractAnalysis {
     protected Coord3d[] points;
     protected Color[] colors;
 
-	// public final static java.awt.Color [] BASICS = null;
-	public final static String [] BASICS = new String[] {
-		"#FF0000", 
-		"#FF7F00", 
-		"#FFFF00", 
-		"#7FFF00", 
-		"#00FF00", 
-		"#00FF7F", 
-		"#00FFFF",
-		"#007FFF", 
-		"#0000FF", 
-		"#7F00FF", 
-		"#FF00FF",
-		"#FF007F",
-		"#000000",
-		"#FFFFFF" 
-	};
-	
-
 	public Visualize( final List<String []> data, final String [] cols ) {
 		if ( null != data ) {
 			this.data = data;	
 			this.cols = cols;
-
-			// Add BASICS to data
-			if ( null != cols && null != BASICS ) {
-				for ( int coli = 0; coli < cols.length; coli++) {
-					if (cols[ coli ].equals("RGB") ) {
-						for ( int basici = 0; basici < BASICS.length; basici++) {
-							// java.awt.Color color = ColorUtils.toColor( BASICS[ basici] );
-							List<String> fakeRow = new LinkedList<String>();
-							for ( int y = 0; y < coli; y++)
-								fakeRow.add( "" );
-							fakeRow.add( BASICS[ basici ]);
-							for ( int y = basici+1; y < cols.length; y++ )
-								fakeRow.add( "" );
-							data.add( fakeRow.toArray( new String[ 0 ] ) );
-						}
-					}					
-				}
-			}
 		}
 	}
 
@@ -129,10 +97,14 @@ public class Visualize extends AbstractAnalysis {
 					if (cols[ coli ].equals("RGB") ) {
 						java.awt.Color color = ColorUtils.toColor( cell );
 						HSLColor hsl = new HSLColor(color); // hue=0.360,sat=0..100,lum-0..100
-						// Coord3d hsl = new Coord3d( hslColor.getHue() * Math.PI / 180.0, hslColor.getLuminance(), hslColor.getSaturation()); // x reps azimuth (radians 0..2pi), y reps elevation, and z reps range.
-						// Coord3d hslp = new Coord3d( hsl.getHue() * Math.PI / 180.0, Math.atan2(hsl.getLuminance(), hsl.getSaturation()), hsl.getSaturation()); // x reps azimuth (radians 0..2pi), y reps elevation, and z reps range.
-						Coord3d hslp = new Coord3d( hsl.getHue() * Math.PI / 180.0, Math.atan2(hsl.getLuminance(), hsl.getSaturation()), 
-						   Math.sqrt(hsl.getLuminance()*hsl.getLuminance() + hsl.getSaturation()*hsl.getSaturation())); // x reps azimuth (radians 0..2pi), y reps elevation, and z reps range.
+						// Scale our HSL hue range of 0..360 to 0..2pi
+						// Scale our HSL saturation range of 0.0..100.0 to 0.0..1.0
+						// Scale our HSL luminance range of 0.0..100.0 to -0.5..0.5
+						float hslf[] = hsl.getHSL(); // HSLColor domain
+						float hslpf[] = new float[] { hslf[HUE] * (float)Math.PI / 180.0f, hslf[SAT]/100.0f/2.0f, hslf[LUM]/100.0f-0.5f, }; // Jzy3d domain
+						// LOGGER.info ("Vis hsl=" + String.format( "%f,%f,%f", hslf[HUE],hslf[SAT],hslf[LUM]));
+						// x reps azimuth (radians 0..2pi), y reps elevation angle, and z reps range.
+						Coord3d hslp = new Coord3d( hslpf[HUE], Math.atan2(hslpf[LUM], hslpf[SAT]), Math.sqrt(hslpf[LUM]*hslpf[LUM] + hslpf[SAT]*hslpf[SAT])); 
 						points[ rowi ] = hslp.cartesian();
 						// points[ rowi ] = new Coord3d( color.getRed(), color.getGreen(), color.getBlue() ); // RGB box
 						colors[ rowi ] = new Color( color.getRed()/255.0f, color.getGreen()/255.0f, color.getBlue()/255.0f, BLOB_ALPHA);

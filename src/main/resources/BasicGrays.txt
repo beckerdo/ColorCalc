@@ -1,0 +1,10 @@
+# Primary grays, pure monochromes including white and black
+# RGB coded as hexadecimal integers, HSL/HSV coded as decimal integers (degree,percents)
+# https://en.wikipedia.org/wiki/HSL_and_HSV#HSL
+# Other dictionaries http://people.csail.mit.edu/jaffer/Color/Dictionaries.html
+Name			RGB 		HSL			HSV
+White			#FFFFFF 	000100100 	000100100
+Light Gray		#BFBFBF 	000000075	000000075
+Gray			#7F7F7F 	000000050	000000050
+Dark Gray		#3F3F3F 	000000025	000000025
+Black			#000000 	000000000	000000000

@@ -4,8 +4,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -41,9 +41,9 @@ import org.apache.commons.cli.ParseException;
  * <p>
  * <pre>
  * Example command line "java ColorCalc -i file1.txt,C:\\Users\\dan\\file2.txt -o output.txt"
- * -i C:\\ArmyPainterDictionary.txt
- * -o C:\\output.txt
- * -d C:\\PrimarySecondaryTertiaryDictionary.txt
+ * -i BasicTones.txt,BasicGrays.txt
+ * -o output.txt
+ * -d BasicSats.txt
  * -c Name,RGB,HSL,S,Dict-Name,Dict-RGB,Dict-HSL
  * -s Dict-H--,Name
  * -t
@@ -107,8 +107,8 @@ public class ColorCalc {
 		// Add colors to dictionary 
 		if ( null != dicts) {
 			for ( String dict: dicts) {
-				LOGGER.info( "dictionary=" + Paths.get(dict).toString());
-				try (Stream<String> stream = Files.lines(Paths.get(dict))) {
+				LOGGER.info( "dictionary=" + Path.of(dict).toAbsolutePath().toString()); // Path.of preferred to Paths.get
+				try (Stream<String> stream = Files.lines(Path.of(dict).toAbsolutePath())) {
 					stream.forEach(line-> {
 						addToDictionary( dictionaryNames, dictionaryHeaders, line);
 					});
@@ -121,8 +121,8 @@ public class ColorCalc {
 		final int[] inputLineCount = new int[] {0}; // Use final for anonymous scope.
 		if ( null != ins ) {
 			for ( String in: ins) {
-				LOGGER.info( "input=" + Paths.get(in).toString());
-				try (Stream<String> stream = Files.lines(Paths.get(in))) {
+				LOGGER.info( "input=" + Path.of(in).toAbsolutePath().toString()); // Path.of preferred to Paths.get
+				try (Stream<String> stream = Files.lines(Path.of(in).toAbsolutePath())) {
 					stream.forEach(line-> {
 						try {
 							if ( line.startsWith("#")) {
@@ -152,8 +152,13 @@ public class ColorCalc {
 								} else {
 									// data line
 									String [] data = scanner.tokens().toArray(String[]::new);
-									LOGGER.debug("data=" + Arrays.toString(data));
-									populateOutputData(outputData, dictionaryNames, cols, headers, dictionaryHeaders, data);
+									if ( -1 != arrayPosition( data, "Name") || -1 != arrayPosition( data, "RGB" ) ) {
+										// This is likely a subsequent "header" line in input file 2..n
+										LOGGER.debug("discarded data=" + Arrays.toString(data));
+									} else {
+										LOGGER.debug("data=" + Arrays.toString(data));
+										populateOutputData(outputData, dictionaryNames, cols, headers, dictionaryHeaders, data);										
+									}
 								}
 								scanner.close();
 							}
@@ -428,26 +433,37 @@ public class ColorCalc {
 						if ( -1 != position ) {
 							// Should normalize output, but what is the String representation of HSL?
 							outputRow[ colIndex ] = data[ position ];							
+							// LOGGER.info( "HSL in=" + outputRow[ colIndex ]);
 						} else {
 							position = arrayPosition(headers, Col.RGB.getName());
 							if ( -1 != position ) {
 								// HSL calculated from RGB
 								outputRow[ colIndex ] = HSLColor.toString( ColorUtils.toColor(data[arrayPosition(headers, Col.RGB.getName())]) );
 							}
+							// LOGGER.info( "HSL using RGB=" + outputRow[ colIndex ]);
 						}
 					} else if ( "Dict".equals( prefix )) {
 						Entry<Color, List<String>> closest = closestColor(dictionaryNames, color);
 						if (null != closest) {
 							outputRow[ colIndex ] = HSLColor.toString(closest.getKey());
 						}
+						// LOGGER.info( "HSL using dictionary=" + outputRow[ colIndex ]);
 					}
+						
 					switch ( col ) {
 						case "H": outputRow[ colIndex ] = outputRow[ colIndex ].substring(0,3); break;
 						case "S": outputRow[ colIndex ] = outputRow[ colIndex ].substring(3,6); break;
 						case "L": outputRow[ colIndex ] = outputRow[ colIndex ].substring(6); break;
 					}
+					// if ( col.equals("H") || col.equals("S") || col.equals("L") )
+					// 	LOGGER.info( "HSL using H S or L=" + outputRow[ colIndex ] );
 					if ( loggerInfo.length() > 0) loggerInfo.append( ", " );
-					loggerInfo.append( col + "=" + outputRow[ colIndex ]);
+					if ( col.equals("H") || col.equals("S") || col.equals("L") ) {
+						loggerInfo.append( col + "=" + outputRow[ colIndex ] ); 						
+					} else {
+						loggerInfo.append( col + "=" + outputRow[ colIndex ] + 
+							", RGB'=" + ColorUtils.toRGB(HSLColor.fromString(outputRow[ colIndex ]).getRGB())); // append derived RGB						
+					}
 					break;					
 				}
 				default: {

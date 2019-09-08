@@ -39,13 +39,20 @@ public class ColorUtils {
 	}
 
 	/**
-	 * Return an String that will perform ANSI color change string or "null" See
-	 * https://en.wikipedia.org/wiki/ANSI_escape_code#24-bit
+	 * Return an String that will perform ANSI color change (in many terminals and editors).
+	 * See https://en.wikipedia.org/wiki/ANSI_escape_code#24-bit
+	 * 
+	 * @param color
+	 * @param foreground or background change 
+	 * @return ANSI color change string
 	 */
-	public static String toANSIRGB(Color color) {
+	public static String toANSIRGB(Color color, boolean foreground) {
 		if (null == color)
 			return "null";
-		return String.format("%s[38;2;%d;%d;%dm", ESC, color.getRed(), color.getGreen(), color.getBlue());
+		if ( foreground )
+			return String.format("%s[38;2;%d;%d;%dm", ESC, color.getRed(), color.getGreen(), color.getBlue());
+		else
+			return String.format("%s[48;2;%d;%d;%dm", ESC, color.getRed(), color.getGreen(), color.getBlue());
 	}
 
 	/**

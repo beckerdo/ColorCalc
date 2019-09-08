@@ -1,0 +1,32 @@
+# Primary (red,green,blue), secondary (yellow,cyan,magenta), and tertiary saturated colors.
+# These colors have been lightened 50% (closer to white) resulting in tints.
+# Also, the shades colors have been desaturated 50% (closer to gray) resulting in tint-tones.
+# Six hue slices through the HSL color space
+# RGB coded as hexadecimal integers, HSL/HSV coded as decimal integers (degree,percents)
+# https://en.wikipedia.org/wiki/HSL_and_HSV#HSL
+# Other dictionaries http://people.csail.mit.edu/jaffer/Color/Dictionaries.html
+Name					RGB 		HSL			HSV
+Red tint				#FF8080 	000100075	000100075
+Yellow-Red tint			#FFBF80 	030100075	030100075
+Yellow tint				#FFFF80 	060100075	060100075
+Green-Yellow tint		#BFFF80 	090100075	090100075
+Green tint				#80FF80 	120100075 	120100075
+Cyan-Green tint			#80FFBF 	150100075 	150100075
+Cyan tint				#80FFFF 	180100075	180100075
+Blue-Cyan tint			#80BFFF 	210100075 	210100075
+Blue tint				#8080FF 	240100075 	240100075
+Magenta-Blue tint		#BF80FF 	270100075 	270100075
+Magenta tint			#FF80FF 	300100075 	300100075
+Red-Magenta tint		#FF80BF 	330100075 	330100075
+Red tint-tone			#DF9F9F 	000050075	000050075
+Yellow-Red tint-tone	#DFBF9F 	030050075	030050075
+Yellow tint-tone		#DFDF9F 	060050075	060050075
+Green-Yellow tint-tone	#BFDF9F 	090050075	090050075
+Green tint-tone			#9FDF9F 	120050075 	120050075
+Cyan-Green tint-tone	#9FDFBF 	150050075 	150050075
+Cyan tint-tone			#9FDFDF 	180050075	180050075
+Blue-Cyan tint-tone		#9FBFDF 	210050075 	210050075
+Blue tint-tone			#9F9FDF 	240050075 	240050075
+Magenta-Blue tint-tone	#BF9FDF 	270050075 	270050075
+Magenta tint-tone		#DF9FDF 	300050075 	300050075
+Red-Magenta tint-tone	#DF9FBF 	330050075 	330050075
