@@ -1,6 +1,5 @@
 # Primary (red,green,blue), secondary (yellow,cyan,magenta), and tertiary saturated colors.
 # These colors have been darkened 50% (closer to black) resulting in shades.
-# Also, the shades colors have been desaturated 50% (closer to gray) resulting in shade-tones.
 # Six hue slices through the HSL color space
 # RGB coded as hexadecimal integers, HSL/HSV coded as decimal integers (degree,percents)
 # https://en.wikipedia.org/wiki/HSL_and_HSV#HSL
@@ -18,15 +17,3 @@ Blue shade				#000080 	240100025 	240100025
 Magenta-Blue shade		#400080 	270100025 	270100025
 Magenta shade			#7F0080 	300100025 	300100025
 Red-Magenta shade		#800040 	330100025 	330100025
-Red shade-tone			#602020 	000050025	000050025
-Yellow-Red shade-tone	#604020 	030050025	030050025
-Yellow shade-tone		#606020 	060050025	060050025
-Green-Yellow shade-tone	#406020 	090050025	090050025
-Green shade-tone		#206020 	120050025 	120050025
-Cyan-Green shade-tone	#206040 	150050025 	150050025
-Cyan shade-tone			#206060 	180050025	180050025
-Blue-Cyan shade-tone	#204060 	210050025 	210050025
-Blue shade-tone			#202060 	240050025 	240050025
-Magenta-Blue shade-tone	#402060 	270050025 	270050025
-Magenta shade-tone		#602060 	300050025 	300050025
-Red-Magenta shade-tone	#602040 	330050025 	330050025
