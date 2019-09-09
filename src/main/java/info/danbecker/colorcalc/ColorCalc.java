@@ -55,6 +55,9 @@ import org.apache.commons.cli.ParseException;
  * <p>
  * The sort will sort colors by dictionary hues (descending) and color name (ascending).
  * The low saturation colors (S<<013) are grouped to the end.
+ * <P>
+ * TODO
+ * Multiple input files with different column positioning will fail.
  * 
  * @author <a href="mailto://dan@danbecker.info>Dan Becker</a>
  */
@@ -189,13 +192,12 @@ public class ColorCalc {
 		// Put all output data to file
 		outputData( outputData, cols, writer );
 
-		// Multiple fileName#.png made into fileName.gif
-		// Not sure whether to use the PlotRenderer or the Visualize to contain this.
-		// animatedGIF( "C:\\Users\\dan\\Dropbox\\games\\ArmyPainter\\ColorPlot" );
-		
 		// An interactive panel that shows/animates a 3D scatter chart using JXY3D library.
 		if ( visualize ) {
 			visualizeData( outputData, cols );
+			
+			// Multiple fileName#.png made into fileName.gif
+			animatedGIF( "C:\\Users\\dan\\Dropbox\\games\\ArmyPainter\\Scatter", 32 );			
 		}
 		
 		if ( null != writer ) {
@@ -574,22 +576,20 @@ public class ColorCalc {
 	 * @param fileName
 	 * @throws IOException
 	 */
-	public final static void animatedGIF( String fileName ) throws IOException {
+	public final static void animatedGIF( String fileName, int steps ) throws IOException {
 		// grab the output image type from the first image in the sequence
 		BufferedImage firstImage = ImageIO.read(new File(fileName + "0.png"));
 
 		// create a new BufferedOutputStream with the last argument
 		ImageOutputStream output = new FileImageOutputStream(new File( fileName + ".gif" ));
 
-		// create a gif sequence with the type of the first image, 2 second
-		// between frames, which loops continuously
-		// GifSequenceWriter writer = new GifSequenceWriter(output, firstImage.getType(), 2, true);
-		GifSequenceWriter writer = new GifSequenceWriter(output, BufferedImage.TYPE_INT_ARGB, 2, true);
+		// create a gif sequence with the type of the first image, X ms between framps, loop
+		GifSequenceWriter writer = new GifSequenceWriter(output, BufferedImage.TYPE_INT_ARGB, 500, true);
 
 		// write out the first image to our sequence...
 		LOGGER.info("Adding GIF=" + fileName + "0.png");
 		writer.writeToSequence(firstImage);
-		for (int i = 1; i < 5; i++) {
+		for (int i = 1; i < steps; i++) {
 			LOGGER.info("Adding GIF=" + fileName + i + ".png");
 			BufferedImage nextImage = ImageIO.read(new File( fileName + i + ".png"));
 			writer.writeToSequence(nextImage);
@@ -609,6 +609,4 @@ public class ColorCalc {
 		Visualize visualize = new Visualize( data, cols );
 		visualize.launch( true, new Rectangle( 200, 200, 1000, 800) ); // launch interactive or static with given size
 	}
-	
-
 }

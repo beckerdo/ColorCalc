@@ -79,7 +79,17 @@ public class Visualize extends AbstractAnalysis {
 
         // LOGGER.info( "TextureData size=" + tData.getWidth() + "," + tData.getHeight());
         // Data = canvas.screenshot( new File("C:\\Users\\dan\\Dropbox\\games\\ArmyPainter\\Scatter.png"));        
-        ChartLauncher.screenshot(this.getChart(), "C:\\Users\\dan\\Dropbox\\games\\ArmyPainter\\Scatter.png"); // screenshot not available
+        // When using polar mode, x reps azimuth (radians), y reps elevation, and z reps range.
+        View view = chart.getView();	        
+        Coord3d viewPoint;
+        		
+        final int steps = 32;
+        String outputName = "C:\\Users\\dan\\Dropbox\\games\\ArmyPainter\\Scatter%d.png";
+        for( int i = 0; i < steps; i++ ) {
+            viewPoint = new Coord3d( i*2.0*Math.PI/steps + Math.PI/4.0, 0.5, 1.5 ); // 0..2PI
+            view.setViewPoint(viewPoint);
+            ChartLauncher.screenshot(this.getChart(), String.format( outputName, i));        	
+        }
 	}
 	
 	protected void convertData() {
@@ -136,7 +146,6 @@ public class Visualize extends AbstractAnalysis {
         
         // Save screenshot
         ICanvas canvas = chart.getCanvas();
-        LOGGER.info( "ICanvas=" + canvas );
-        
+        LOGGER.info( "ICanvas=" + canvas );        
     }
 }

@@ -10,6 +10,9 @@ import java.awt.Color;
  * @author <a href="mailto://dan@danbecker.info>Dan Becker</a>
  */
 public class ColorUtils {
+	public static final org.slf4j.Logger LOGGER = 
+			org.slf4j.LoggerFactory.getLogger(ColorUtils.class);
+	
 	public static final String ESC = new String(new byte[] { 0x1B });
 
 	/** Return an RGB color or null */
@@ -20,6 +23,7 @@ public class ColorUtils {
 		if (colorString.startsWith("#")) {
 			colorString = colorString.substring("#".length());
 		}
+		// LOGGER.info( "toColor string=" + colorString );
 		return new Color(Integer.parseInt(colorString.substring(0, 2), 16), Integer.parseInt(colorString.substring(2, 4), 16),
 				Integer.parseInt(colorString.substring(4), 16), 255);
 	}
