@@ -12,10 +12,18 @@ package info.danbecker.colorcalc;
 import javax.imageio.*;
 import javax.imageio.metadata.*;
 import javax.imageio.stream.*;
+
 import java.awt.image.*;
 import java.io.*;
 import java.util.Iterator;
 
+/**
+ * Use GifSequenceWriter to sequence a number of Images
+ * or files to an animated Gif.
+ * <p>
+ * @author <a href="mailto://dan@danbecker.info>Dan Becker</a>
+ *
+ */
 public class GifSequenceWriter {
 	protected ImageWriter gifWriter;
 	protected ImageWriteParam imageWriteParam;
@@ -127,33 +135,90 @@ public class GifSequenceWriter {
 	}
 
 	/**
-	 * public GifSequenceWriter( BufferedOutputStream outputStream, int imageType,
-	 * int timeBetweenFramesMS, boolean loopContinuously) {
+	 * Writes a given array of input file names to an output file name
+	 * <p>
+	 * Example:
+	 * <code>animateGIF( "output.gif", new [] { "input.png", "input.jpg" }, 0, true );</code>
+	 * <p>
+	 * Issue from
+	 * <a href="https://stackoverflow.com/questions/51163881/issue-with-converting-an-arraylist-of-bufferedimages-to-a-gif-using-gifsequencew">
+	 * Stack Overflow</a>
+	 * <p>
+	 * There's a problem with the the GifSequenceWriter when using palette images
+	 * (BufferedImage.TYPE_BYTE_INDEXED with IndexColorModel). This will create
+	 * metadata based on a default 216 color palette (the web safe palette), which
+	 * is clearly different from the colors in your image.
+	 * <p>
+	 * <pre>
+	 * The problematic lines in GifSequenceWriter: 
+	 *    ImageTypeSpecifier imageTypeSpecifier =
+	 *       ImageTypeSpecifier.createFromBufferedImageType(imageType); 
+	 *    imageMetaData = gifWriter.getDefaultImageMetadata(imageTypeSpecifier, imageWriteParam);
+	 * </pre>
+	 * <p>
+	 * You can simply use:
+	 * <pre> 
+	 *    GifSequenceWriter writer = new GifSequenceWriter(output,
+	 *       BufferedImage.TYPE_INT_ARGB, delayTimeMS, true);
+	 * </pre>
 	 * 
+	 * @param outputFileName   name of animated GIF output file
+	 * @param inputFileNames   names of Java supported input image files
+	 * @param frameDelay       time in milli seconds between frames
+	 * @param loopContinuously continuous loop or play once?
+	 * @throws IOException
 	 */
-	public static void main(String[] args) throws Exception {
-		if (args.length > 1) {
+	public static void animateGIF(String outputFileName, String[] inputFileNames, int frameDelay,
+			boolean loopContinuously) throws IOException {
+		if (inputFileNames.length > 1) {
+			// create a new image output stream with the output file name
+			ImageOutputStream output = new FileImageOutputStream(new File(outputFileName));
+
 			// grab the output image type from the first image in the sequence
-			BufferedImage firstImage = ImageIO.read(new File(args[0]));
+			BufferedImage firstImage = ImageIO.read(new File(inputFileNames[0]));
 
-			// create a new BufferedOutputStream with the last argument
-			ImageOutputStream output = new FileImageOutputStream(new File(args[args.length - 1]));
-
-			// create a gif sequence with the type of the first image, 1 second
-			// between frames, which loops continuously
-			GifSequenceWriter writer = new GifSequenceWriter(output, firstImage.getType(), 1, false);
+			// create a gif sequence with the first image type, given frame delay, and looping
+			GifSequenceWriter writer = new GifSequenceWriter(output, firstImage.getType(), 
+				frameDelay,	loopContinuously);
 
 			// write out the first image to our sequence...
 			writer.writeToSequence(firstImage);
-			for (int i = 1; i < args.length - 1; i++) {
-				BufferedImage nextImage = ImageIO.read(new File(args[i]));
+
+			// write remaining images
+			for (int i = 1; i < inputFileNames.length - 1; i++) {
+				BufferedImage nextImage = ImageIO.read(new File(inputFileNames[i]));
 				writer.writeToSequence(nextImage);
 			}
 
+			// close up
 			writer.close();
 			output.close();
-		} else {
-			System.out.println("Usage: java GifSequenceWriter [list of gif files] [output file]");
 		}
+	}
+	
+	/**
+	 * Writes a numbered list of input file names to an output file name. The input
+	 * file name is formated with String.format("%d", frameNumber).
+	 * <p>
+	 * Example:
+	 * <code>animateGIF( "output.gif", "input%d.png", 64, 0, true );</code>
+	 * 
+	 * @param outputFileName   name of animated GIF output file
+	 * @param inputFilePattern names of Java supported input image files where a
+	 *                         count in substituted into the pattern with
+	 *                         String.format("%d", frameNumber)
+	 * @param frameCount       the number of input files that match the pattern
+	 * @param frameDelay       time in milli seconds between frames
+	 * @param loopContinuously continuous loop or play once?
+	 * @throws IOException
+	 */
+	public static void animateGIF( String outputFileName, String inputFileNamePattern, int frameCount, 
+		int frameDelay, boolean loopContinuously ) throws IOException {
+		
+		String [] inputFileNames = new String[ frameCount ];
+		for ( int i = 0; i < frameCount; i++) {
+			inputFileNames[ i ] = String.format( inputFileNamePattern, i);
+		}
+		animateGIF( outputFileName, inputFileNames, frameDelay, loopContinuously );		
 	}
 }

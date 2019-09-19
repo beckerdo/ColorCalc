@@ -1,7 +1,6 @@
 package info.danbecker.colorcalc;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,14 +17,9 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import javax.imageio.ImageIO;
-import javax.imageio.stream.FileImageOutputStream;
-import javax.imageio.stream.ImageOutputStream;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -51,6 +45,8 @@ import org.apache.commons.cli.ParseException;
  * -r "Colors grouped by major color, low saturation moved to end"
  * -p C:\\colorPlot.png
  * -v
+ * -vs 64
+ * -vd 0
  * </pre>
  * <p>
  * The sort will sort colors by dictionary hues (descending) and color name (ascending).
@@ -82,6 +78,8 @@ public class ColorCalc {
     protected static String comment;
     protected static String plotName;
     protected static boolean visualize;
+    protected static int vSteps = 0;
+    protected static int vDelay = 0;
 
     // program data
     protected static Map<Color,List<String>> dictionaryNames = new HashMap<>(); 
@@ -194,10 +192,7 @@ public class ColorCalc {
 
 		// An interactive panel that shows/animates a 3D scatter chart using JXY3D library.
 		if ( visualize ) {
-			visualizeData( outputData, cols );
-			
-			// Multiple fileName#.png made into fileName.gif
-			animatedGIF( "C:\\Users\\dan\\Dropbox\\games\\ArmyPainter\\Scatter", 32 );			
+			visualizeData( outputData, cols, vSteps, vDelay );
 		}
 		
 		if ( null != writer ) {
@@ -224,6 +219,8 @@ public class ColorCalc {
         options.addOption("p", "plot", true, "output a plot of the colors to the given file");
         options.addOption("r", "comment", true, "output file comment (remark)");
         options.addOption("v", "visualize", false, "open interactive window with 3D plot"); // switch option
+        options.addOption("vs", " visual steps", true, "number of steps in visual animation");
+        options.addOption("vd", " visual delay", true, "millisecond delay between animation steps (0 for none)");
 
 		CommandLineParser cliParser = new DefaultParser();
 		CommandLine line = cliParser.parse(options, args);
@@ -280,6 +277,14 @@ public class ColorCalc {
         if (line.hasOption("v")) {
             visualize = true;
             LOGGER.info("visualize=" + visualize );
+        }
+        if (line.hasOption("vs")) {
+            vSteps = Integer.parseInt(line.getOptionValue("vs"));
+            LOGGER.info("vis steps=" + vSteps );
+        }
+        if (line.hasOption("vd")) {
+            vDelay = Integer.parseInt(line.getOptionValue("vd"));
+            LOGGER.info("vis delay=" + vDelay );
         }
 	}
 	
@@ -551,62 +556,22 @@ public class ColorCalc {
 	}
 	
 	/**
-	 * Example
-	 * <p>
-	 * Issue
-	 * https://stackoverflow.com/questions/51163881/issue-with-converting-an-arraylist-of-bufferedimages-to-a-gif-using-gifsequencew
-	 * There's a problem with the the GifSequenceWriter when using palette images
-	 * (BufferedImage.TYPE_BYTE_INDEXED with IndexColorModel). This will create
-	 * metadata based on a default 216 color palette (the web safe palette), which
-	 * is clearly different from the colors in your image.
-	 * <p>
-	 * <pre>
-	 * The problematic lines in GifSequenceWriter: 
-	 *    ImageTypeSpecifier imageTypeSpecifier =
-	 *       ImageTypeSpecifier.createFromBufferedImageType(imageType); 
-	 *    imageMetaData = gifWriter.getDefaultImageMetadata(imageTypeSpecifier, imageWriteParam);
-	 * </pre>
-	 * <p>
-	 * You can simply use:
-	 * <pre> 
-	 *    GifSequenceWriter writer = new GifSequenceWriter(output,
-	 *       BufferedImage.TYPE_INT_ARGB, delayTimeMS, true);
-	 * </pre>
-	 * 
-	 * @param fileName
-	 * @throws IOException
-	 */
-	public final static void animatedGIF( String fileName, int steps ) throws IOException {
-		// grab the output image type from the first image in the sequence
-		BufferedImage firstImage = ImageIO.read(new File(fileName + "0.png"));
-
-		// create a new BufferedOutputStream with the last argument
-		ImageOutputStream output = new FileImageOutputStream(new File( fileName + ".gif" ));
-
-		// create a gif sequence with the type of the first image, X ms between framps, loop
-		GifSequenceWriter writer = new GifSequenceWriter(output, BufferedImage.TYPE_INT_ARGB, 500, true);
-
-		// write out the first image to our sequence...
-		LOGGER.info("Adding GIF=" + fileName + "0.png");
-		writer.writeToSequence(firstImage);
-		for (int i = 1; i < steps; i++) {
-			LOGGER.info("Adding GIF=" + fileName + i + ".png");
-			BufferedImage nextImage = ImageIO.read(new File( fileName + i + ".png"));
-			writer.writeToSequence(nextImage);
-		}
-
-		writer.close();
-		output.close();
-	}
-
-	/**
 	 * An interactive panel that shows/animates a 3D scatter chart using JXY3D library.
 	 * 
 	 * @param outputData
 	 * @param cols
 	 */
-	public static void visualizeData( final List<String[]> data, final String [] cols ) throws Exception {
+	public static void visualizeData( final List<String[]> data, final String [] cols, int vSteps, int vDelay ) throws Exception {
 		Visualize visualize = new Visualize( data, cols );
 		visualize.launch( true, new Rectangle( 200, 200, 1000, 800) ); // launch interactive or static with given size
+		
+		if ( vSteps != 0) {
+			final String animationName ="C:\\Users\\dan\\Dropbox\\games\\ArmyPainter\\Scatter.gif"; 
+			LOGGER.info( "Animation name=" + animationName + ", steps=" + vSteps + ", delay=" + vDelay);
+					
+			// Multiple fileName#.png made into fileName.gif
+			visualize.animateGIF( animationName, vSteps, vDelay, true );			
+			LOGGER.info( "Animation name=" + animationName + ", steps=" + vSteps + ", completed." );
+		}
 	}
 }
