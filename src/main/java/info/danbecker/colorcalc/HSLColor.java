@@ -188,6 +188,15 @@ public class HSLColor {
 	}
 
 	/**
+	 * Get the HSLA values.
+	 *
+	 * @return the HSLA values.
+	 */
+	public float[] getHSLA() {
+		return new float[] { hsl[0], hsl[1], hsl[2], alpha };
+	}
+
+	/**
 	 * Get the Luminance value.
 	 *
 	 * @return the Luminance value.
@@ -235,14 +244,11 @@ public class HSLColor {
 		float b = rgb[2];
 
 		// Minimum and Maximum RGB values are used in the HSL calculations
-
 		float min = Math.min(r, Math.min(g, b));
 		float max = Math.max(r, Math.max(g, b));
 
 		// Calculate the Hue
-
 		float h = 0;
-
 		if (max == min)
 			h = 0;
 		else if (max == r)
@@ -253,13 +259,10 @@ public class HSLColor {
 			h = (60 * (r - g) / (max - min)) + 240;
 
 		// Calculate the Luminance
-
 		float l = (max + min) / 2;
 
 		// Calculate the Saturation
-
 		float s = 0;
-
 		if (max == min)
 			s = 0;
 		else if (l <= .5f)

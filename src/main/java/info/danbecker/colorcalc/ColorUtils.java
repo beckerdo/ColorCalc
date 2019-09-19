@@ -24,8 +24,15 @@ public class ColorUtils {
 			colorString = colorString.substring("#".length());
 		}
 		// LOGGER.info( "toColor string=" + colorString );
-		return new Color(Integer.parseInt(colorString.substring(0, 2), 16), Integer.parseInt(colorString.substring(2, 4), 16),
+		if ( 6 == colorString.length()) {
+			return new Color(Integer.parseInt(colorString.substring(0, 2), 16), Integer.parseInt(colorString.substring(2, 4), 16),
 				Integer.parseInt(colorString.substring(4), 16), 255);
+		} else if ( 8 == colorString.length()) {
+			return new Color(Integer.parseInt(colorString.substring(0, 2), 16), Integer.parseInt(colorString.substring(2, 4), 16),
+					Integer.parseInt(colorString.substring(4, 6), 16), Integer.parseInt(colorString.substring(6), 16));			
+		} else {
+			throw new IllegalArgumentException( "could not handle color string " + colorString);
+		}
 	}
 
 	/** Return an Color as RGB hex string or "null" */
