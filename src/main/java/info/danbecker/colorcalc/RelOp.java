@@ -16,6 +16,7 @@ public enum RelOp {
     	this.name = name;
     	this.symbol = symbol;
     }
+	
 	public String getName() {
 		return name; 
 	}
@@ -23,11 +24,16 @@ public enum RelOp {
 		return symbol; 
 	}
 	
-	/** Returns an enum based on the given shortcut or abbreviation. */
-	public static RelOp fromSymbol( String string ) {
+	/** Returns an enum based on the given name such as "EQ" or "LT". */
+	public static RelOp fromName( String name ) {
+		return RelOp.valueOf( RelOp.class, name );
+	}
+	
+	/** Returns an enum based on the given symbol such as "==" or "<=" */
+	public static RelOp fromSymbol( String symbol ) {
 		RelOp relOp = null;
-        if ( null != string ) {
-            switch ( string ) {
+        if ( null != symbol ) {
+            switch ( symbol ) {
     		case "==": relOp = RelOp.EQ; break;
     		case "!=": relOp = RelOp.NE; break;
     		case "<<": relOp = RelOp.LT; break;
