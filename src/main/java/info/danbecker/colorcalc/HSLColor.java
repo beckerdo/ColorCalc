@@ -6,21 +6,34 @@ import java.awt.Color;
  * The HSLColor class provides methods to manipulate HSL (Hue, Saturation
  * Luminance) values to create a corresponding Color object using the RGB
  * ColorSpace.
- *
+ * <p>
  * The HUE is the color (0=red,60=yellow,120=green,180=cyan,240=blue,300=magenta),
  * the Saturation is the purity of the color (0=gray, 100=pure),
  * and Luminance is the brightness of the color (0=black and 100=white).
- *
+ * <p>
  * The Hue is specified as an angle between 0 - 360 degrees where red is 0,
  * green is 120 and blue is 240. In between you have the colors of the rainbow.
  * Saturation is specified as a percentage between 0 - 100 where 100 is fully
  * saturated and 0 approaches gray. Luminance is specified as a percentage
  * between 0 - 100 where 0 is black and 100 is white.
- *
+ * <p>
  * In particular the HSL color space makes it easier change the Tone or Shade of
  * a color by adjusting the luminance value.
+ * <p>
+ * The Color instance data rgb must be maintained by constructors
+ * to ensure the hash and compareTo methods work.
  */
-public class HSLColor {
+public class HSLColor implements Comparable<HSLColor>{
+
+	/** Tolerance for float compares */
+	public static final float TOLERANCE = 0.0001f;
+
+	/** Positions in returned for HSLA arrays */
+	public static final int HUE_POS = 0;
+	public static final int SAT_POS = 1;
+	public static final int LUM_POS = 2;
+	public static final int ALPHA_POS = 3;
+	
 	private Color rgb;
 	private float[] hsl;
 	private float alpha;
@@ -42,7 +55,7 @@ public class HSLColor {
 	 *
 	 * @param h is the Hue value in degrees between 0 - 360
 	 * @param s is the Saturation percentage between 0 - 100
-	 * @param l is the Lumanance percentage between 0 - 100
+	 * @param l is the Luminance percentage between 0 - 100
 	 */
 	public HSLColor(float h, float s, float l) {
 		this(h, s, l, 1.0f);
@@ -53,7 +66,7 @@ public class HSLColor {
 	 *
 	 * @param h     the Hue value in degrees between 0 - 360
 	 * @param s     the Saturation percentage between 0 - 100
-	 * @param l     the Lumanance percentage between 0 - 100
+	 * @param l     the Luminance percentage between 0 - 100
 	 * @param alpha the alpha value between 0 - 1
 	 */
 	public HSLColor(float h, float s, float l, float alpha) {
@@ -93,7 +106,7 @@ public class HSLColor {
 	 * @return the RGB Color object
 	 */
 	public Color adjustHue(float degrees) {
-		return toRGB(degrees, hsl[1], hsl[2], alpha);
+		return toRGB(degrees, hsl[SAT_POS], hsl[LUM_POS], alpha);
 	}
 
 	/**
@@ -104,7 +117,7 @@ public class HSLColor {
 	 * @return the RGB Color object
 	 */
 	public Color adjustLuminance(float percent) {
-		return toRGB(hsl[0], hsl[1], percent, alpha);
+		return toRGB(hsl[HUE_POS], hsl[SAT_POS], percent, alpha);
 	}
 
 	/**
@@ -115,7 +128,7 @@ public class HSLColor {
 	 * @return the RGB Color object
 	 */
 	public Color adjustSaturation(float percent) {
-		return toRGB(hsl[0], percent, hsl[2], alpha);
+		return toRGB(hsl[HUE_POS], percent, hsl[LUM_POS], alpha);
 	}
 
 	/**
@@ -128,9 +141,9 @@ public class HSLColor {
 	 */
 	public Color adjustShade(float percent) {
 		float multiplier = (100.0f - percent) / 100.0f;
-		float l = Math.max(0.0f, hsl[2] * multiplier);
+		float l = Math.max(0.0f, hsl[LUM_POS] * multiplier);
 
-		return toRGB(hsl[0], hsl[1], l, alpha);
+		return toRGB(hsl[HUE_POS], hsl[SAT_POS], l, alpha);
 	}
 
 	/**
@@ -143,18 +156,9 @@ public class HSLColor {
 	 */
 	public Color adjustTone(float percent) {
 		float multiplier = (100.0f + percent) / 100.0f;
-		float l = Math.min(100.0f, hsl[2] * multiplier);
+		float l = Math.min(100.0f, hsl[LUM_POS] * multiplier);
 
-		return toRGB(hsl[0], hsl[1], l, alpha);
-	}
-
-	/**
-	 * Get the Alpha value.
-	 *
-	 * @return the Alpha value.
-	 */
-	public float getAlpha() {
-		return alpha;
+		return toRGB(hsl[HUE_POS], hsl[SAT_POS], l, alpha);
 	}
 
 	/**
@@ -165,17 +169,8 @@ public class HSLColor {
 	 * @return the RGB Color object
 	 */
 	public Color getComplementary() {
-		float hue = (hsl[0] + 180.0f) % 360.0f;
-		return toRGB(hue, hsl[1], hsl[2]);
-	}
-
-	/**
-	 * Get the Hue value.
-	 *
-	 * @return the Hue value.
-	 */
-	public float getHue() {
-		return hsl[0];
+		float hue = (hsl[HUE_POS] + 180.0f) % 360.0f;
+		return toRGB(hue, hsl[SAT_POS], hsl[LUM_POS]);
 	}
 
 	/**
@@ -193,16 +188,7 @@ public class HSLColor {
 	 * @return the HSLA values.
 	 */
 	public float[] getHSLA() {
-		return new float[] { hsl[0], hsl[1], hsl[2], alpha };
-	}
-
-	/**
-	 * Get the Luminance value.
-	 *
-	 * @return the Luminance value.
-	 */
-	public float getLuminance() {
-		return hsl[2];
+		return new float[] { hsl[HUE_POS], hsl[SAT_POS], hsl[LUM_POS], alpha };
 	}
 
 	/**
@@ -215,19 +201,39 @@ public class HSLColor {
 	}
 
 	/**
+	 * Get the Hue value.
+	 *
+	 * @return the Hue value.
+	 */
+	public float getHue() {
+		return hsl[HUE_POS];
+	}
+
+	/**
+	 * Get the Luminance value.
+	 *
+	 * @return the Luminance value.
+	 */
+	public float getLuminance() {
+		return hsl[LUM_POS];
+	}
+
+	/**
 	 * Get the Saturation value.
 	 *
 	 * @return the Saturation value.
 	 */
 	public float getSaturation() {
-		return hsl[1];
+		return hsl[SAT_POS];
 	}
 
-	@Override
-	public String toString() {
-		String toString = "HSLColor[h=" + hsl[0] + ",s=" + hsl[1] + ",l=" + hsl[2] + ",alpha=" + alpha + "]";
-
-		return toString;
+	/**
+	 * Get the Alpha value.
+	 *
+	 * @return the Alpha value.
+	 */
+	public float getAlpha() {
+		return alpha;
 	}
 
 	/**
@@ -274,25 +280,9 @@ public class HSLColor {
 	}
 
 	/**
-	 * Convert a RGB Color to it corresponding HSL value string.
-	 * The string is of the form "012345678" where:
-	 * 012 = hue (0-360)
-	 * 345 = sat (0-100
-	 * 678 = luminance (0-100)
-	 * The numbers are zero padded to always be 3 digits.
-	 * 
-	 * @return a string containing the 3 HSL values.
-	 */
-	public static String toString(Color color) {
-		float [] hsl = HSLColor.fromRGB( color );
-		return String.format("%03d%03d%03d", 
-		   Float.valueOf(hsl[ 0 ]).intValue(), Float.valueOf(hsl[ 1 ]).intValue(), Float.valueOf(hsl[ 2 ]).intValue() );
-	}
-
-	/**
 	 * Convert HSL values to a RGB Color with a default alpha value of 1. H (Hue) is
 	 * specified as degrees in the range 0 - 360. S (Saturation) is specified as a
-	 * percentage in the range 1 - 100. L (Lumanance) is specified as a percentage
+	 * percentage in the range 1 - 100. L (Luminance) is specified as a percentage
 	 * in the range 1 - 100.
 	 *
 	 * @param hsl an array containing the 3 HSL values
@@ -306,7 +296,7 @@ public class HSLColor {
 	/**
 	 * Convert HSL values to a RGB Color. H (Hue) is specified as degrees in the
 	 * range 0 - 360. S (Saturation) is specified as a percentage in the range 1 -
-	 * 100. L (Lumanance) is specified as a percentage in the range 1 - 100.
+	 * 100. L (Luminance) is specified as a percentage in the range 1 - 100.
 	 *
 	 * @param hsl   an array containing the 3 HSL values
 	 * @param alpha the alpha value between 0 - 1
@@ -314,7 +304,7 @@ public class HSLColor {
 	 * @returns the RGB Color object
 	 */
 	public static Color toRGB(float[] hsl, float alpha) {
-		return toRGB(hsl[0], hsl[1], hsl[2], alpha);
+		return toRGB(hsl[HUE_POS], hsl[SAT_POS], hsl[LUM_POS], alpha);
 	}
 
 	/**
@@ -413,14 +403,85 @@ public class HSLColor {
 	 * @param nineDigits
 	 * @return
 	 */
-	public static final HSLColor fromString( String nineDigits) {
+	public static final HSLColor fromString(String nineDigits) {
 		if ( null == nineDigits || nineDigits.length() < 9 ) {
 			throw new IllegalArgumentException ( "String \"" + "\" should be of form HHHSSSLLL" );
 		}
-		return new HSLColor( (float) Integer.parseInt( nineDigits.substring(0,3)),
-				Integer.parseInt( nineDigits.substring(3,6)),
-				Integer.parseInt( nineDigits.substring(6))
-				);
+		return new HSLColor( 
+			Integer.parseInt( nineDigits.substring(0,3)),
+			Integer.parseInt( nineDigits.substring(3,6)),
+			Integer.parseInt( nineDigits.substring(6))
+		);
 	}
 
+    // Object methods
+    public static int compare(final HSLColor hsl1, final HSLColor hsl2) {
+    	// Problems if hsla floats bits are NaN. Avoid casts and floatToRawIntBits
+    	// Compare with self
+    	if ( hsl1 == hsl2 ) {
+    		return 0;
+    	}
+    	// Compare with nulls
+    	if ( null == hsl2) {
+    		return 1;
+    	}
+    	if ( null == hsl1) {
+    		return -1;
+    	}
+    	
+    	// Always ensure constructors and method maintain rgb.    	
+        return hsl1.rgb.getRGB() - hsl2.rgb.getRGB();
+    }
+
+	@Override
+	public int compareTo(HSLColor hsl) {
+		return compare( this, hsl );
+	}
+
+    @Override
+    public int hashCode() {
+    	// Always ensure constructors and method maintain rgb.
+        return rgb.hashCode();
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        // Compare with self   
+        if (obj == this) { 
+            return true; 
+        } 
+  
+        // Compare with class type
+        if (!(obj instanceof HSLColor)) { 
+            return false; 
+        } 
+          
+        // Cast to same type  
+        HSLColor hsl = (HSLColor) obj; 
+          
+        // Compare data by compare method
+        return 0 == compare( this, hsl );
+    }
+
+	@Override
+	public String toString() {
+		String toString = "HSLColor[h=" + hsl[HUE_POS] + ",s=" + hsl[SAT_POS] + ",l=" + hsl[LUM_POS] + ",alpha=" + alpha + "]";
+		return toString;
+	}
+
+	/**
+	 * Convert a RGB Color to it corresponding HSL value string.
+	 * The string is of the form "012345678" where:
+	 * 012 = hue (0-360)
+	 * 345 = sat (0-100
+	 * 678 = luminance (0-100)
+	 * The numbers are zero padded to always be 3 digits.
+	 * 
+	 * @return a string containing the 3 HSL values.
+	 */
+	public static String toString(Color color) {
+		float [] hsl = HSLColor.fromRGB( color );
+		return String.format("%03d%03d%03d", 
+		   Float.valueOf(hsl[HUE_POS]).intValue(), Float.valueOf(hsl[SAT_POS]).intValue(), Float.valueOf(hsl[LUM_POS]).intValue() );
+	}
 }

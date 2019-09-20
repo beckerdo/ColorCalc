@@ -1,5 +1,9 @@
 package info.danbecker.colorcalc;
 
+import static info.danbecker.colorcalc.HSLColor.HUE_POS;
+import static info.danbecker.colorcalc.HSLColor.SAT_POS;
+import static info.danbecker.colorcalc.HSLColor.LUM_POS;
+
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -33,11 +37,6 @@ import org.jzy3d.plot3d.rendering.view.View;
 public class Visualize extends AbstractAnalysis {
 	public static final org.slf4j.Logger LOGGER = 
 			org.slf4j.LoggerFactory.getLogger(Visualize.class);
-	
-	// Positions for HSL arrays
-	public static final int HUE = 0;
-	public static final int SAT = 1;
-	public static final int LUM = 2;
 	
 	public static final float BLOB_SIZE = 15.0f; // Size of scatter plot blob
 	public static final float BLOB_ALPHA = 0.75f; // Transparency of blob
@@ -129,10 +128,12 @@ public class Visualize extends AbstractAnalysis {
 						// Scale our HSL saturation range of 0.0..100.0 to 0.0..1.0
 						// Scale our HSL luminance range of 0.0..100.0 to -0.5..0.5
 						float hslf[] = hsl.getHSL(); // HSLColor domain
-						float hslpf[] = new float[] { hslf[HUE] * (float)Math.PI / 180.0f, hslf[SAT]/100.0f/2.0f, hslf[LUM]/100.0f-0.5f, }; // Jzy3d domain
+						float hslpf[] = new float[] { hslf[HUE_POS] * (float)Math.PI / 180.0f, 
+							hslf[SAT_POS]/100.0f/2.0f, hslf[LUM_POS]/100.0f-0.5f, }; // Jzy3d domain
 						// LOGGER.info ("Vis hsl=" + String.format( "%f,%f,%f", hslf[HUE],hslf[SAT],hslf[LUM]));
 						// x reps azimuth (radians 0..2pi), y reps elevation angle, and z reps range.
-						Coord3d hslp = new Coord3d( hslpf[HUE], Math.atan2(hslpf[LUM], hslpf[SAT]), Math.sqrt(hslpf[LUM]*hslpf[LUM] + hslpf[SAT]*hslpf[SAT])); 
+						Coord3d hslp = new Coord3d( hslpf[HUE_POS], Math.atan2(hslpf[LUM_POS], hslpf[SAT_POS]), 
+							Math.sqrt(hslpf[LUM_POS]*hslpf[LUM_POS] + hslpf[SAT_POS]*hslpf[SAT_POS])); 
 						points[ rowi ] = hslp.cartesian();
 						// points[ rowi ] = new Coord3d( color.getRed(), color.getGreen(), color.getBlue() ); // RGB box
 						colors[ rowi ] = new Color( color.getRed()/255.0f, color.getGreen()/255.0f, color.getBlue()/255.0f, BLOB_ALPHA);
