@@ -5,26 +5,43 @@ import java.awt.Color;
 import org.junit.Test;
 import org.junit.Before;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-public class ColorUtilsTest {
-	
-	public static final Float TOLERANCE = 0.0001f;
+public class ColorUtilsTest {	
 	public static final org.slf4j.Logger LOGGER = 
 			org.slf4j.LoggerFactory.getLogger( ColorUtilsTest.class);
+	
+	public static final double TOLERANCE = 0.01;
 	
 	@Before
     public void setup() {
 	}
 	
 	@Test
-    public void testConstructors() {
-	}
-	
-	@Test
-    public void testStrings() {
+    public void testStatics() {
+		Color DANGRAY = ColorUtils.toColor( "#7f7f7f" );		
+		assertEquals( "to Color to String", "7F7F7F", ColorUtils.toRGB(DANGRAY));
+		assertTrue( "to Color null", null == ColorUtils.toColor( null ) );
+		assertTrue( "to RGB null", null == ColorUtils.toRGB( null ) );
+		Color DANGRAYCLEAR = ColorUtils.toColor( "#7f7f7f7f" );		
+		assertEquals( "to Color to String alpha", "7F7F7F7F", ColorUtils.toRGBA(DANGRAYCLEAR));
+		assertTrue( "to RGBA null", null == ColorUtils.toRGBA( null ) );
 		
-		Color DANGRAY = ColorUtils.toColor( "#7f7f7fff" );		
-		assertEquals( "to Color to String", "7F7F7FFF", ColorUtils.toRGBA( DANGRAY));
-	}
+		// toANSI
+		assertTrue( "toANSIRGB null", null == ColorUtils.toANSIRGB( null, true ) );
+		String ansi = ColorUtils.toANSIRGB( ColorUtils.toColor("#7f7f7f7f"), true );
+		assertTrue( "toANSIRGB fore", ansi.contains( "[38;2;127;127;127m")  );
+		ansi = ColorUtils.toANSIRGB( ColorUtils.toColor("#7f7f7f7f"), false );
+		assertTrue( "toANSIRGB bacl", ansi.contains( "[48;2;127;127;127m")  );
+		
+		// distance weighted
+		assertEquals( "distance weighted null", Double.MAX_VALUE, ColorUtils.distanceWeighted( DANGRAY, null ), TOLERANCE);
+		assertEquals( "distance weighted null", Double.MAX_VALUE, ColorUtils.distanceWeighted( null, DANGRAY ), TOLERANCE);
+		assertEquals( "distance weighted", 380.92, ColorUtils.distanceWeighted( DANGRAY, Color.BLACK ), TOLERANCE);
 
+		// distance euclidean
+		assertEquals( "distance euclidean null", Double.MAX_VALUE, ColorUtils.distanceEuclidean( DANGRAY, null ), TOLERANCE);
+		assertEquals( "distance euclidean null", Double.MAX_VALUE, ColorUtils.distanceEuclidean( null, DANGRAY ), TOLERANCE);
+		assertEquals( "distance euclidean", 219.97, ColorUtils.distanceEuclidean( DANGRAY, Color.BLACK ), TOLERANCE);
+	}
 }

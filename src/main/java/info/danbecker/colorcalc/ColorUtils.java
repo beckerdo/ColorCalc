@@ -38,14 +38,14 @@ public class ColorUtils {
 	/** Return an Color as RGB hex string or "null" */
 	public static String toRGB(Color color) {
 		if (null == color)
-			return "null";
+			return null;
 		return String.format("%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue());
 	}
 
 	/** Return an Color as RGBA hex string or "null" */
 	public static String toRGBA(Color color) {
 		if (null == color)
-			return "null";
+			return null;
 		return String.format("%s%02X", toRGB(color), color.getAlpha());
 	}
 
@@ -59,7 +59,7 @@ public class ColorUtils {
 	 */
 	public static String toANSIRGB(Color color, boolean foreground) {
 		if (null == color)
-			return "null";
+			return null;
 		if ( foreground )
 			return String.format("%s[38;2;%d;%d;%dm", ESC, color.getRed(), color.getGreen(), color.getBlue());
 		else
