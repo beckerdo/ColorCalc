@@ -3,10 +3,16 @@ package info.danbecker.colorcalc;
 import org.junit.Test;
 import org.junit.Before;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
+import java.awt.Color;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class ColorCalcTest {
 	public static final org.slf4j.Logger LOGGER = 
@@ -17,16 +23,6 @@ public class ColorCalcTest {
 	
 	@Test
     public void testParseOptions() {
-//        options.addOption("s", "sorts", true, "column sort fields (followed by + or - for ascending, descending)");
-//        options.addOption("g", "groups", true, "column sort fields ");
-//        options.addOption("c", "cols", true, "column output fields");
-//        options.addOption("t", "table", false, "output a colorful HTML table"); // switch option
-//        options.addOption("p", "plot", true, "output a plot of the colors to the given file");
-//        options.addOption("r", "comment", true, "output file comment (remark)");
-//        options.addOption("v", "visualize", false, "open interactive window with 3D plot"); // switch option
-//        options.addOption("vs", " visual steps", true, "number of steps in visual animation");
-//        options.addOption("vd", " visual delay", true, "millisecond delay between animation steps (0 for none)");
-
 		assertTrue( "option i null", null == ColorCalc.ins);
 		assertTrue( "option d null", null == ColorCalc.dicts);
 		assertTrue( "option o null", null == ColorCalc.out);
@@ -94,6 +90,65 @@ public class ColorCalcTest {
 		} catch (Exception e) {
 			LOGGER.error( "parseOptions", e);
 		}
+	}
+
+	@Test
+    public void testPopulateOutputData() {
+		/** Take the given data line and populate the columns of the output file
+		 *  from the dictionary and calculations 
+		 *  Example column names  "Name,RGB,HSL,Dict-Name,Dict-RGB,Dict-HSL"
+		 */
+		// public static void populateOutputData(List<String[]> outputData, Map<Color,List<String>> dictionaryNames,
+		// 		String[] cols, String[] headers, String[] dictionaryHeaders, String[] data) {
+		List<String[]> outputData = new LinkedList<>();
+		Map<Color,List<String>> dictionary = new HashMap<>();
+		dictionary.put( Color.RED, Arrays.asList("red"));
+		dictionary.put( Color.GREEN, Arrays.asList("green"));
+		dictionary.put( Color.BLUE, Arrays.asList("blue"));
+		
+		String [] cols = new String[] {"Name","RGB","HSL","Dict-Name","Dict-RGB"};
+		String [] headers = new String[] {"RGB","Name","Owner" };
+		String [] dictionaryHeaders = new String[] {"Dict-Name", "Dict-RGB" };
+		String [] data = new String[] { "FF0000", "Bright Red", "Fred"};
+		
+		assertTrue( "output data empty", 0 == outputData.size());
+		ColorCalc.populateOutputData( outputData, dictionary, cols, headers, dictionaryHeaders, data);
+		assertTrue( "output data populated", 1 == outputData.size());
+		// Name=Bright Red, RGB=FF0000, HSL=000100050, RGB'=FF0000, Dict-Name=[red], RGB=FF0000
+		String [] returnedData = outputData.get(0);
+		LOGGER.debug( "returned data=" + Arrays.deepToString(returnedData));
+		for( int col = 0; col < returnedData.length; col++) {
+			switch( col ) {
+			case 0: assertEquals( "name", data[ 1], returnedData[ col ]); break;
+			case 1: assertEquals( "rgb", data[ 0], returnedData[ col ]); break;
+			case 2: assertEquals( "hsl", "000100050", returnedData[ col ]); break;
+			// case 3: assertEquals( "dict name", Arrays.asList("red"), returnedData[ col ]); break;
+			case 4: assertEquals( "dict rgb", "FF0000", returnedData[ col ]); break;
+			}
+		}
+	}
+
+	@Test
+    public void testClosestColor() {
+		// public static Entry<Color,List<String>> closestColor( Map<Color,List<String>> dictionaryNames, Color color ){
+		assertTrue( "dictionary null", null == ColorCalc.closestColor(null, Color.GRAY));
+		
+		Map<Color,List<String>> dictionary = new HashMap<>();
+		dictionary.put( Color.RED, Arrays.asList("red"));
+		dictionary.put( Color.GREEN, Arrays.asList("green"));
+		dictionary.put( Color.BLUE, Arrays.asList("blue"));
+		assertTrue( "color null", null == ColorCalc.closestColor(dictionary, null));
+
+		assertTrue( "dictionary red", 
+				new AbstractMap.SimpleEntry<Color,List<String>>(Color.RED, Arrays.asList("red")).equals(ColorCalc.closestColor(dictionary, Color.RED)) 
+				);
+		LOGGER.debug( "Cyan closest=" + ColorCalc.closestColor(dictionary, Color.CYAN));
+		assertTrue( "dictionary green", 
+				new AbstractMap.SimpleEntry<Color,List<String>>(Color.GREEN, Arrays.asList("green")).equals(ColorCalc.closestColor(dictionary, Color.CYAN)) 
+				);
+		assertTrue( "dictionary blue", 
+				new AbstractMap.SimpleEntry<Color,List<String>>(Color.BLUE, Arrays.asList("blue")).equals(ColorCalc.closestColor(dictionary, Color.BLUE)) 
+				);
 	}
 
 	@Test
