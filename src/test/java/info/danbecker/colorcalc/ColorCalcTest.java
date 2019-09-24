@@ -30,6 +30,15 @@ public class ColorCalcTest {
 		assertTrue( "option i null", null == ColorCalc.ins);
 		assertTrue( "option d null", null == ColorCalc.dicts);
 		assertTrue( "option o null", null == ColorCalc.out);
+		assertTrue( "option s null", null == ColorCalc.sorts);
+		assertTrue( "option g null", null == ColorCalc.groups);
+		assertTrue( "option c null", null == ColorCalc.cols);
+		assertTrue( "option t false", false == ColorCalc.table);
+		assertTrue( "option p null", null == ColorCalc.plotName);
+		assertTrue( "option r null", null == ColorCalc.comment);
+		assertTrue( "option v false", false == ColorCalc.visualize);
+		assertTrue( "option vs 0", 0 == ColorCalc.vSteps);
+		assertTrue( "option vd 0", 0 == ColorCalc.vDelay);
 
 		try {
 			String [] options = new String []{"-i","foo,bar"};			
@@ -44,6 +53,43 @@ public class ColorCalcTest {
 			options = new String []{"-o","fred"};			
 			ColorCalc.parseGatherOptions( options );
 			assertTrue( "option o", "fred".equals(ColorCalc.out));
+
+			options = new String []{"-s","a,b,c"};			
+			ColorCalc.parseGatherOptions( options );
+			assertTrue( "option s", Arrays.deepEquals(ColorCalc.sorts, new String []{"a","b","c"}));
+
+			options = new String []{"-g","x,y,z"};			
+			ColorCalc.parseGatherOptions( options );
+			assertTrue( "option g", Arrays.deepEquals(ColorCalc.groups, new String []{"x","y","z"}));
+
+			options = new String []{"-c","1,2,3"};			
+			ColorCalc.parseGatherOptions( options );
+			assertTrue( "option c", Arrays.deepEquals(ColorCalc.cols, new String []{"1","2","3"}));
+
+			options = new String []{"-t"};			
+			ColorCalc.parseGatherOptions( options );
+			assertTrue( "option t",  ColorCalc.table);
+
+			options = new String []{"-p","plotName"};			
+			ColorCalc.parseGatherOptions( options );
+			assertTrue( "option p", "plotName".equals(ColorCalc.plotName));
+
+			options = new String []{"-r","remark"};			
+			ColorCalc.parseGatherOptions( options );
+			assertTrue( "option r", "remark".equals(ColorCalc.comment));
+
+			options = new String []{"-v"};			
+			ColorCalc.parseGatherOptions( options );
+			assertTrue( "option v",  ColorCalc.visualize);
+
+			options = new String []{"-vs","10"};			
+			ColorCalc.parseGatherOptions( options );
+			assertTrue( "option vs", Integer.valueOf( 10 ).equals(ColorCalc.vSteps));
+
+			options = new String []{"-vd","20"};			
+			ColorCalc.parseGatherOptions( options );
+			assertTrue( "option vd", Integer.valueOf( 20 ).equals(ColorCalc.vDelay));
+
 
 		} catch (Exception e) {
 			LOGGER.error( "parseOptions", e);
