@@ -35,6 +35,8 @@ public class ColorFieldComparator implements Comparator<String[]> {
 	public ColorFieldComparator( final String [] colHeadings, final String[] sorts) {
 		this.colHeadings = colHeadings;
 		this.sorts = sorts;
+		if ( null == sorts )
+			return;
 		
 		// Create structures that point to the correct columns, ascending or descending.
 		colNums = new int[sorts.length];
@@ -59,7 +61,7 @@ public class ColorFieldComparator implements Comparator<String[]> {
 			// Determine column index in data
 			colNums[ colIndex ]  = ColorCalc.arrayPosition( colHeadings, sort );
 			if ( -1 == colNums[ colIndex ]  ) { 
-				LOGGER.warn( "Sort column (" + colIndex + ") " + sort + " does not appear in " + Arrays.toString(colHeadings));
+				LOGGER.warn( "Sort column (" + colIndex + ") \"" + sort + "\" does not appear in headings " + Arrays.toString(colHeadings));
 			}
 			colIndex++;
 		}
@@ -67,7 +69,17 @@ public class ColorFieldComparator implements Comparator<String[]> {
 	
     @Override
     public int compare(String[] row1, String[] row2) {
-       // Compare row/col data based on the previously calculated column numbers.
+    	if ( null == colHeadings || 0 == colHeadings.length || null == sorts || 0 == sorts.length)
+    		return 0;
+    	if ( null == row1 ) {
+    		if ( null == row2 )
+    			return 0;
+    		return 1;
+    	} else if ( null == row2 ) {
+    		return -1;
+    	}
+    	
+    	// Compare row/col data based on the previously calculated column numbers.
 		for ( int colIndex = 0; colIndex < colNums.length; colIndex++ ) {
 			if ( -1 != colNums[ colIndex ]) {
 				if ( null != row1[ colNums[ colIndex ]  ]) {
