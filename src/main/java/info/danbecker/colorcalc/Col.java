@@ -6,7 +6,7 @@ public enum Col {
 	RGB( "RGB", "rgb" ),
 	R( "Red", "r" ),
 	G( "Green", "g" ),
-	B( "Blue", "g" ),
+	B( "Blue", "b" ),
 	HSL( "HSL", "hsl" ),
 	H( "Hue", "h" ),
 	S( "Sat", "s" ),
