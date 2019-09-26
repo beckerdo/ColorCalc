@@ -2,7 +2,6 @@ package info.danbecker.colorcalc;
 
 import org.junit.Test;
 import org.junit.Before;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 
 public class ColorFieldComparatorTest {
@@ -29,8 +28,6 @@ public class ColorFieldComparatorTest {
 		assertEquals( "null sorts", 1, cfc.compare( null, new String[] { "1" } ));
 		assertEquals( "null sorts", -1, cfc.compare( new String[] { "1" }, null ));
 
-		// Test null data
-
 		// Test first field default
 		cfc = new ColorFieldComparator( cols, new String[] {"A"} );
 		assertEquals( "null cols", 0, cfc.compare( new String[] { "1", "2", "3" }, new String[] { "1", "3", "4" } ));
@@ -50,7 +47,5 @@ public class ColorFieldComparatorTest {
 		assertEquals( "null cols", 0, cfc.compare( new String[] { "1", "2", "3" }, new String[] { "2", "3", "3" } ));
 		assertEquals( "null cols", -1, cfc.compare( new String[] { "1", "2", "3" }, new String[] { "2", "3", "4" } ));
 		assertEquals( "null cols", 1, cfc.compare( new String[] { "1", "2", "3" }, new String[] { "0", "1", "2" } ));
-
 	}
-
 }
