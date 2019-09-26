@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.awt.Color;
@@ -172,11 +173,23 @@ public class ColorCalcTest {
 
 	@Test
     public void testAddToDictionary() {
-	    // protected static Map<Color,List<String>> dictionaryNames = new HashMap<>(); 
-
+	    Map<Color,List<String>> dictionaryNames = new HashMap<>();
 		// public static void addToDictionary(Map<Color, List<String>> dictionaryNames, String[] localDictionaryHeaders, String line) {
 		
-		// Test nulls
-		assertThrows(NumberFormatException.class, () -> { Integer.parseInt("One"); } , "expected exception");
+	    // Populate headers
+	    assertTrue( null == ColorCalc.dictionaryHeaders );
+		ColorCalc.addToDictionary( null, null, "Name  RGB	Foo");
+		assertTrue( Arrays.deepEquals( new String[] { "Name", "RGB", "Foo" }, ColorCalc.dictionaryHeaders)  );
+		
+		// Add to dictionary
+		assertTrue( 0 == dictionaryNames.size() );
+		ColorCalc.addToDictionary( dictionaryNames, ColorCalc.dictionaryHeaders, "Pure Red   #FF0000	Fred");
+		assertTrue( 1 == dictionaryNames.size() );
+		assertArrayEquals( new String[] { "Pure Red" }, dictionaryNames.get( Color.RED ).toArray(new String[0]));
+
+		// Assert no null exception thrown
+		ColorCalc.addToDictionary( null, ColorCalc.dictionaryHeaders, "Pure Red   #FF0000	Fred");
+
+		// assertThrows( NullPointerException.class, () -> { ColorCalc.addToDictionary( null, dictionaryHeaders, line); });
 	}
 }
