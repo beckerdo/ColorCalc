@@ -1,15 +1,14 @@
 package info.danbecker.colorcalc;
 
-import org.junit.Test;
-import org.junit.Before;
-
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ColTest {
 	public static final org.slf4j.Logger LOGGER = 
 			org.slf4j.LoggerFactory.getLogger( ColTest.class);
 
-	@Before
+	@BeforeEach
     public void setup() {
 	}
 	
@@ -19,11 +18,11 @@ public class ColTest {
 		// System.out.println( "Col values count=" + values.length );
 		for ( Col value : values ) {
 			// System.out.println( "Col value=" + value + ", name=" + value.name() + ", getName=" + value.getName() + ", symbol=" + value.getAbbreviation());
-			assertEquals( "fromAbbreviation", value, Col.fromAbbreviation( value.getAbbreviation() ));
+			assertEquals( value, Col.fromAbbreviation( value.getAbbreviation() ), "fromAbbreviation");
 		}
 		
 		// assertEquals( "name null", null, RelOp.fromName(null) ); // exception
-		assertEquals( "fromSymbol null", null, Col.fromAbbreviation(null) );
+		assertEquals( null, Col.fromAbbreviation(null), "fromSymbol null");
 	}
 
 }

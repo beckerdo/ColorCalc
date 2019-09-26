@@ -1,15 +1,14 @@
 package info.danbecker.colorcalc;
 
-import org.junit.Test;
-import org.junit.Before;
-
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RelOpTest {
 	public static final org.slf4j.Logger LOGGER = 
 			org.slf4j.LoggerFactory.getLogger( RelOpTest.class);
 
-	@Before
+	@BeforeEach
     public void setup() {
 	}
 	
@@ -18,12 +17,12 @@ public class RelOpTest {
 		RelOp[] values = RelOp.values();
 		for ( RelOp value : values ) {
 			// LOGGER.info( "RelOp value=" + value + ", name=" + value.name() + ", getName=" + value.getName() + ", symbol=" + value.getSymbol());
-			assertEquals( "name", value, RelOp.fromName( value.name()) );
-			assertEquals( "fromSymbol", value, RelOp.fromSymbol( value.getSymbol() ));
+			assertEquals( value, RelOp.fromName( value.name()) );
+			assertEquals( value, RelOp.fromSymbol( value.getSymbol() ));
 		}
 		
 		// assertEquals( "name null", null, RelOp.fromName(null) ); // exception
-		assertEquals( "fromSymbol null", null, RelOp.fromSymbol(null) );
+		assertEquals( null, RelOp.fromSymbol(null) );
 	}
 
 }

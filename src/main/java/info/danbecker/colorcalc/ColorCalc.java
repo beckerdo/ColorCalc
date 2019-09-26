@@ -288,7 +288,7 @@ public class ColorCalc {
         }
 	}
 	
-	/** Create dictionary from given files */
+	/** Add dictionary line as a header or data line. */
 	public static void addToDictionary(Map<Color, List<String>> dictionaryNames, String[] localDictionaryHeaders, String line) {
 		if (line.startsWith("#")) {
 			LOGGER.debug("dictionary comment=" + line);

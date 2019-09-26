@@ -23,6 +23,21 @@
 		<version.java.target>1.8</version.java.target>
 	</properties>
 
+	<dependencyManagement>
+    	<dependencies>
+        	<dependency>
+				<!-- JUnit 5 = JUnit Platform + JUnit Jupiter + JUnit Vintage -->
+				<!-- Still need to use dependecues (without version) below -->
+				<!-- Info at https://junit.org/junit5/docs/current/user-guide/ -->
+            	<groupId>org.junit</groupId>
+            	<artifactId>junit-bom</artifactId>
+            	<version>5.5.2</version>
+            	<type>pom</type>
+            	<scope>import</scope>
+        	</dependency>
+    	</dependencies>
+	</dependencyManagement>
+	
 	<dependencies>
 		<!-- Utilities -->
 		<dependency>
@@ -44,11 +59,15 @@
 		</dependency>
 		<!-- Testing -->
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.12</version>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
 			<scope>test</scope>
-		</dependency>
+		</dependency>		
+		<!-- <dependency>
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
+			<scope>test</scope>
+		</dependency> -->		
 	</dependencies>
 
 	<build>
