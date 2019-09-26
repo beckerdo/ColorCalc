@@ -43,5 +43,27 @@ public class ColorUtilsTest {
 		assertEquals( "distance euclidean null", Double.MAX_VALUE, ColorUtils.distanceEuclidean( DANGRAY, null ), TOLERANCE);
 		assertEquals( "distance euclidean null", Double.MAX_VALUE, ColorUtils.distanceEuclidean( null, DANGRAY ), TOLERANCE);
 		assertEquals( "distance euclidean", 219.97, ColorUtils.distanceEuclidean( DANGRAY, Color.BLACK ), TOLERANCE);
+		
+		// alpha
+		int newAlpha = 255/2;
+	    Color color = ColorUtils.changeAlpha( Color.BLACK, newAlpha ); 
+		assertEquals( "alpha r", Color.BLACK.getRed(), color.getRed() );
+		assertEquals( "alpha g", Color.BLACK.getGreen(), color.getGreen() );
+		assertEquals( "alpha b", Color.BLACK.getBlue(), color.getBlue() );
+		assertEquals( "alpha a", newAlpha, color.getAlpha() );
+
+		// gray
+		HSLColor hslColor = new HSLColor( Color.WHITE );
+		Color gray = ColorUtils.luminanceGray(hslColor);
+		assertEquals( "gray", 0xff, gray.getRed() );
+		assertEquals( "gray", 0xff, gray.getGreen() );
+		assertEquals( "gray", 0xff, gray.getBlue() );
+		assertEquals( "gray", 0xff, gray.getAlpha() );
+		hslColor = new HSLColor( Color.RED );
+		gray = ColorUtils.luminanceGray(hslColor);
+		assertEquals( "gray", 0x80, gray.getRed() );
+		assertEquals( "gray", 0x80, gray.getGreen() );
+		assertEquals( "gray", 0x80, gray.getBlue() );
+		assertEquals( "gray", 0xff, gray.getAlpha() );
 	}
 }

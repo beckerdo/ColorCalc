@@ -75,7 +75,7 @@ public class PlotRenderer {
 	    // Make plot background.
 	    int borderWidth = 4;
 	    g2d.setStroke( new BasicStroke ( borderWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND ) );
-	    Color plotBackground = changeAlpha( Color.BLACK, 2 * 255 / 4 ); // ghosted gray 
+	    Color plotBackground = ColorUtils.changeAlpha( Color.BLACK, 2 * 255 / 4 ); // ghosted gray 
     	g2d.setColor( plotBackground );
 		g2d.fillOval( borderWidth/2, borderWidth/2, size.width - borderWidth, size.height - borderWidth); // x, y, width, height
 	    Color boundary = Color.BLACK;
@@ -95,9 +95,9 @@ public class PlotRenderer {
 	    
 		// Draw colors
 	    g2d.setStroke( new BasicStroke ( 2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND ) );
-		int lineWidth = 2;
+		// int lineWidth = 2;
 		int sampleWidth = size.width / 50;
-		int namePosition = ColorCalc.arrayPosition(colNames, Col.NAME.getName());
+		// int namePosition = ColorCalc.arrayPosition(colNames, Col.NAME.getName());
 		int hslPosition = ColorCalc.arrayPosition(colNames, Col.HSL.getName());
 		if ( -1 == hslPosition ) {
 			LOGGER.warn( "No HSL column in " + colNames );
@@ -125,7 +125,7 @@ public class PlotRenderer {
 			// LOGGER.debug( "HSL=" + hslColor.toString() + ", rgb=" + hslColor.getRGB() +  ", xy=" + point);
 			g2d.setColor(hslColor.getRGB());
 			g2d.fillOval( point.x, point.y, sampleWidth, sampleWidth); // x, y, width, height
-			g2d.setColor( luminanceGray(hslColor) );
+			g2d.setColor( ColorUtils.luminanceGray(hslColor) );
 			g2d.drawOval( point.x, point.y, sampleWidth, sampleWidth); // x, y, width, height
 		}
 		
@@ -138,7 +138,7 @@ public class PlotRenderer {
 					Point point = pointFromHSL( size, borderWidth, hslColor );					
 					g2d.setColor(hslColor.getRGB());
 					g2d.fillOval( point.x, point.y, sampleWidth, sampleWidth); // x, y, width, height
-					g2d.setColor( luminanceGray(hslColor) );
+					g2d.setColor( ColorUtils.luminanceGray(hslColor) );
 					g2d.drawOval( point.x, point.y, sampleWidth, sampleWidth); // x, y, width, height
 					break;
 				}
@@ -230,19 +230,5 @@ public class PlotRenderer {
 		at.scale( scale, scale );
 		Shape shape = at.createTransformedShape(path);
         return shape;
-    }
-    
-    /** Changes color to given alpha value. */
-    public static Color changeAlpha( Color color, int alpha ) {
-       Color newColor = new Color ( color.getRed(), color.getGreen(), color.getBlue(), alpha );
-       return newColor;
-    }
- 
-    public final static Color luminanceGray( HSLColor hslColor ) {
-        // float mono = (0.2125f * color.getRed()) + (0.7154f * color.getGreen()) + (0.0721f * color.getBlue());
-		int lum255 = Math.round(hslColor.getLuminance() * 255.0f / 100f);
-        return new Color( lum255, lum255, lum255 );
-    }
-     
-
+    }    
 }

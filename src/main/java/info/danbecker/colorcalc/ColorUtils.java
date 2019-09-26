@@ -104,4 +104,17 @@ public class ColorUtils {
 		int ΔB2 =  ( color1.getBlue() - color2.getBlue() ) * ( color1.getBlue() - color2.getBlue() );
 		return Math.sqrt( ΔR2 + ΔG2 + ΔB2 );
 	}
+	
+    /** Changes color to given alpha value. */
+    public static Color changeAlpha( Color color, int alpha ) {
+       Color newColor = new Color ( color.getRed(), color.getGreen(), color.getBlue(), alpha );
+       return newColor;
+    }
+
+    /** Returns grayed value of given color. */
+    public final static Color luminanceGray( HSLColor hslColor ) {
+        // float mono = (0.2125f * color.getRed()) + (0.7154f * color.getGreen()) + (0.0721f * color.getBlue());
+		int lum255 = Math.round(hslColor.getLuminance() * 255.0f / 100f);
+        return new Color( lum255, lum255, lum255 );
+    }
 }
