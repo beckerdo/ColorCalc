@@ -1,13 +1,21 @@
 package info.danbecker.colorcalc;
 
+import org.junit.runner.RunWith;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+// import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.awt.Color;
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,11 +24,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+@RunWith(MockitoJUnitRunner.class)
 public class ColorCalcTest {
 	public static final org.slf4j.Logger LOGGER = 
-			org.slf4j.LoggerFactory.getLogger(ColorCalcTest.class);	
+			org.slf4j.LoggerFactory.getLogger(ColorCalcTest.class);
+	
 	@BeforeEach
     public void setup() {
+		// MockitoAnnotations.initMocks(this);
 	}
 	
 	@Test
@@ -191,5 +202,26 @@ public class ColorCalcTest {
 		ColorCalc.addToDictionary( null, ColorCalc.dictionaryHeaders, "Pure Red   #FF0000	Fred");
 
 		// assertThrows( NullPointerException.class, () -> { ColorCalc.addToDictionary( null, dictionaryHeaders, line); });
+	}
+	
+	@Test
+    public void testOutputData() throws IOException {
+		List<String[]> outputData = Arrays.asList(
+				new String[] {"Grey", "7f7f7f"},
+				new String[] {"Gray", "7f7f7f"}
+			);
+		String [] cols = new String[] { "Name", "RGB"};
+		ColorCalc.table = false;
+
+		BufferedWriter writer = Mockito.mock(BufferedWriter.class);
+
+		ColorCalc.outputData(outputData, cols, writer);
+		
+		verify(writer, times(1)).write("Name");
+		verify(writer, times(1)).write("RGB");
+		verify(writer, times(1)).write("Gray");
+		verify(writer, times(1)).write("Grey");
+		verify(writer, times(2)).write("7f7f7f");
+		verify(writer, times(3)).write(System.getProperty("line.separator"));
 	}
 }
