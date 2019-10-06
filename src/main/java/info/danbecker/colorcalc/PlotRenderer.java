@@ -13,6 +13,7 @@ import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -100,7 +101,7 @@ public class PlotRenderer {
 		// int namePosition = ColorCalc.arrayPosition(colNames, Col.NAME.getName());
 		int hslPosition = ColorCalc.arrayPosition(colNames, Col.HSL.getName());
 		if ( -1 == hslPosition ) {
-			LOGGER.warn( "No HSL column in " + colNames );
+			LOGGER.warn( "No "+ Col.HSL.getName() + " column in " + Arrays.toString( colNames ) );
 			return null;
 		}
 		Color [] basics = new Color[]{

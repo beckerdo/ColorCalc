@@ -45,6 +45,7 @@ import org.apache.commons.cli.ParseException;
  * -r "Colors grouped by major color, low saturation moved to end"
  * -p C:\\colorPlot.png
  * -v
+ * -vn colorVisualization.gif
  * -vs 64
  * -vd 0
  * </pre>
@@ -78,6 +79,7 @@ public class ColorCalc {
     protected static String comment;
     protected static String plotName;
     protected static boolean visualize;
+    protected static String visualizationName;
     protected static int vSteps = 0;
     protected static int vDelay = 0;
 
@@ -192,7 +194,7 @@ public class ColorCalc {
 
 		// An interactive panel that shows/animates a 3D scatter chart using JXY3D library.
 		if ( visualize ) {
-			visualizeData( outputData, cols, vSteps, vDelay );
+			visualizeData( outputData, cols, visualizationName, vSteps, vDelay );
 		}
 		
 		if ( null != writer ) {
@@ -219,6 +221,7 @@ public class ColorCalc {
         options.addOption("p", "plot", true, "output a plot of the colors to the given file");
         options.addOption("r", "comment", true, "output file comment (remark)");
         options.addOption("v", "visualize", false, "open interactive window with 3D plot"); // switch option
+        options.addOption("vn", " visual name", true, "output file name of visual animation");
         options.addOption("vs", " visual steps", true, "number of steps in visual animation");
         options.addOption("vd", " visual delay", true, "millisecond delay between animation steps (0 for none)");
 
@@ -277,6 +280,10 @@ public class ColorCalc {
         if (line.hasOption("v")) {
             visualize = true;
             LOGGER.info("visualize=" + visualize );
+        }
+        if (line.hasOption("vn")) {
+            visualizationName = line.getOptionValue("vn");
+            LOGGER.info("vis name=" + visualizationName );
         }
         if (line.hasOption("vs")) {
             vSteps = Integer.parseInt(line.getOptionValue("vs"));
@@ -561,17 +568,16 @@ public class ColorCalc {
 	 * @param outputData
 	 * @param cols
 	 */
-	public static void visualizeData( final List<String[]> data, final String [] cols, int vSteps, int vDelay ) throws Exception {
+	public static void visualizeData( final List<String[]> data, final String [] cols, String vName, int vSteps, int vDelay ) throws Exception {
 		Visualize visualize = new Visualize( data, cols );
 		visualize.launch( true, new Rectangle( 200, 200, 1000, 800) ); // launch interactive or static with given size
 		
 		if ( vSteps != 0) {
-			final String animationName ="C:\\Users\\dan\\Dropbox\\games\\ArmyPainter\\Scatter.gif"; 
-			LOGGER.info( "Animation name=" + animationName + ", steps=" + vSteps + ", delay=" + vDelay);
+			LOGGER.info( "Visualization animation name=" + vName + ", steps=" + vSteps + ", delay=" + vDelay);
 					
 			// Multiple fileName#.png made into fileName.gif
-			visualize.animateGIF( animationName, vSteps, vDelay, true );			
-			LOGGER.info( "Animation name=" + animationName + ", steps=" + vSteps + ", completed." );
+			visualize.animateGIF( vName, vSteps, vDelay, true );			
+			LOGGER.info( "Visualization animation name=" + vName + ", steps=" + vSteps + ", completed." );
 		}
 	}
 }
