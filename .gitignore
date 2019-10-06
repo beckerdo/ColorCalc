@@ -19,6 +19,8 @@ hs_err_pid*
 .classpath
 .project
 .settings
+bin
+
 
 #testing
 test-reports
