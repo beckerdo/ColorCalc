@@ -62,6 +62,8 @@ public class ColorFieldComparator implements Comparator<String[]> {
 			colNums[ colIndex ]  = ColorCalc.arrayPosition( colHeadings, sort );
 			if ( -1 == colNums[ colIndex ]  ) { 
 				LOGGER.warn( "Sort column (" + colIndex + ") \"" + sort + "\" does not appear in headings " + Arrays.toString(colHeadings));
+			} else {
+                LOGGER.info( "Sort column (" + colIndex + ")" + ", column name=\"" + sorts[ colIndex ] + "\", data col=" + colNums[colIndex] + ", ascending=" + ascending[ colIndex ]); 			    
 			}
 			colIndex++;
 		}

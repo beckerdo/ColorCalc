@@ -185,8 +185,7 @@ public class ColorCalc {
 
 		// Draw a pretty picture
 		if ( null != plotName ) {
-			Dimension size = new Dimension( 800, 800 );
-			PlotRenderer.writeImage( PlotRenderer.renderImage( size, outputData, cols ), plotName );
+			PlotRenderer.writeImage( PlotRenderer.renderImage( new Dimension( 800, 800 ), outputData, cols ), plotName );
 		}
 
 		// Put all output data to file
@@ -572,7 +571,8 @@ public class ColorCalc {
 		Visualize visualize = new Visualize( data, cols );
 		visualize.launch( true, new Rectangle( 200, 200, 1000, 800) ); // launch interactive or static with given size
 		
-		if ( vSteps != 0) {
+		// Save animation to file
+		if (null != vName) {
 			LOGGER.info( "Visualization animation name=" + vName + ", steps=" + vSteps + ", delay=" + vDelay);
 					
 			// Multiple fileName#.png made into fileName.gif

@@ -60,7 +60,6 @@ public class PlotRenderer {
 	public static BufferedImage renderImage(Dimension size, List<String[]> data, String[] colNames) {
 		if (( null == size) || (size.width < 1) || (size.height < 1))
 			return null;
-    	// System.out.println( "RasterRenderer.renderImage size=" + size );
 
 		// Init graphics
 		PlotRenderer rr = new PlotRenderer( size );
