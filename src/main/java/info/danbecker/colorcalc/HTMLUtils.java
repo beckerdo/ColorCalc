@@ -70,7 +70,7 @@ public class HTMLUtils {
 	
     public static void footer( Writer writer, String [] args )  throws IOException {
         writer.write("<tr>");
-        writer.write("<td>Created with command: ");
+        writer.write("<td colspan=\"100\">Created with command: ");
         int argi = 0;
         for ( String arg: args) {
             if (argi > 0 ) writer.write( ", " );
