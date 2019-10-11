@@ -58,6 +58,7 @@ public class HTMLUtils {
 		writer.write("<tr><td colspan=\"100\">" + line + "</td></tr>");
 		writer.write(NL);
 	}
+
 	public static void header( Writer writer, String [] cols )  throws IOException {
 		writer.write("<tr>");
 		for ( String col: cols) {
@@ -67,6 +68,20 @@ public class HTMLUtils {
 		writer.write(NL);		
 	}
 	
+    public static void footer( Writer writer, String [] args )  throws IOException {
+        writer.write("<tr>");
+        writer.write("<td>Created with command: ");
+        int argi = 0;
+        for ( String arg: args) {
+            if (argi > 0 ) writer.write( ", " );
+            writer.write( arg );
+            argi++;
+        }
+        writer.write("</td>");
+        writer.write("</tr>");
+        writer.write(NL);       
+    }
+    
 	public static void data( Writer writer, String [] cols, String [] data ) throws IOException {
 		writer.write("<tr>");		
 		for (int i = 0; i< cols.length; i++) {

@@ -191,6 +191,9 @@ public class ColorCalc {
 		// Put all output data to file
 		outputData( outputData, cols, writer );
 
+		// Add footers to file or table.
+        outputFooters( table, args, writer );
+
 		// An interactive panel that shows/animates a 3D scatter chart using JXY3D library.
 		if ( visualize ) {
 			visualizeData( outputData, cols, visualizationName, vSteps, vDelay );
@@ -549,7 +552,23 @@ public class ColorCalc {
 			}
 		}
 	}
-	
+
+   /** Output footers to file. 
+     */
+    public static void outputFooters( boolean table, String [] args, BufferedWriter writer) throws IOException{
+        // Output column names
+        if (!table) {
+            writer.write("# Created with command: ");
+            for (int i = 0; i < args.length; i++) {
+                if (i > 0) writer.write(",");
+                writer.write(args[i]);
+            }
+            writer.write(NL);
+        } else {
+            HTMLUtils.footer(writer, args);
+        }
+    }
+
 	/** Given rows of String data, determine the longest string in the given column */
 	public static int longestString( List<String[]> outputData, int col ) {
 		int longest = 0;
