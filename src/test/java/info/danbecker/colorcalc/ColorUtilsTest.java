@@ -34,16 +34,6 @@ public class ColorUtilsTest {
 		ansi = ColorUtils.toANSIRGB( ColorUtils.toColor("#7f7f7f7f"), false );
 		assertTrue( ansi.contains( "[48;2;127;127;127m")  );
 		
-		// distance weighted
-		assertEquals( Double.MAX_VALUE, ColorUtils.distanceWeighted( DANGRAY, null ), TOLERANCE);
-		assertEquals( Double.MAX_VALUE, ColorUtils.distanceWeighted( null, DANGRAY ), TOLERANCE);
-		assertEquals( 380.92, ColorUtils.distanceWeighted( DANGRAY, Color.BLACK ), TOLERANCE);
-
-		// distance euclidean
-		assertEquals( Double.MAX_VALUE, ColorUtils.distanceEuclidean( DANGRAY, null ), TOLERANCE);
-		assertEquals( Double.MAX_VALUE, ColorUtils.distanceEuclidean( null, DANGRAY ), TOLERANCE);
-		assertEquals( 219.97, ColorUtils.distanceEuclidean( DANGRAY, Color.BLACK ), TOLERANCE);
-		
 		// alpha
 		int newAlpha = 255/2;
 	    Color color = ColorUtils.changeAlpha( Color.BLACK, newAlpha ); 

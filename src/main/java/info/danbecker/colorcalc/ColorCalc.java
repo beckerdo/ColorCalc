@@ -38,6 +38,7 @@ import org.apache.commons.cli.ParseException;
  * -i BasicTones.txt,BasicGrays.txt
  * -o output.txt
  * -d BasicSats.txt
+ * -dist RGBWeighted
  * -c Name,RGB,HSL,S,Dict-Name,Dict-RGB,Dict-HSL
  * -s Dict-H--,Name
  * -t
@@ -72,6 +73,7 @@ public class ColorCalc {
     protected static String[] ins;
     protected static String out;
     protected static String[] dicts;
+    protected static ColorDistance dist = new ColorDistanceRGBEuclidean();
     protected static String[] sorts;
     protected static String[] groups;
     protected static String[] cols;
@@ -215,6 +217,7 @@ public class ColorCalc {
         options.addOption("h", "help", false, "print the command line options");
         options.addOption("i", "ins", true, "list of comma-separated input files");
         options.addOption("d", "dicts", true, "list of comma-separated dictionary files for comparisons");
+        options.addOption("dist", "dist", true, "algorithm used for color distance (default=RGBEuclidean)");
         options.addOption("o", "out", true, "generated output file with results");
         options.addOption("s", "sorts", true, "column sort fields (followed by + or - for ascending, descending)");
         options.addOption("g", "groups", true, "column sort fields ");
@@ -251,6 +254,17 @@ public class ColorCalc {
             String option = line.getOptionValue("dicts");
             dicts = option.split(CMD_DELIM);
             LOGGER.info("dicts=" + Arrays.toString( dicts ));
+        }
+        if (line.hasOption("dist")) {
+            String option = line.getOptionValue("dist");
+            if (option.toLowerCase().startsWith("rgbe")) {
+                dist = new ColorDistanceRGBEuclidean();
+            } else if (option.toLowerCase().startsWith("rgbw")) {
+                dist = new ColorDistanceRGBWeighted();
+            } else {
+                LOGGER.warn("dist=" + option + ", could not find color distance algorithm" );                
+            }
+            LOGGER.info("dist=" + option + ", color distance algorithm=" + dist.getClass().getSimpleName() );
         }
         if (line.hasOption("s")) {
             String option = line.getOptionValue("sorts");
@@ -369,8 +383,7 @@ public class ColorCalc {
 
 		for ( Entry<Color,List<String>> entry: colorEntries) {
 			Color colorEntry = entry.getKey();
-			double distance = ColorUtils.distanceEuclidean( color, colorEntry);
-			// double distance = ColorUtils.distanceWeighted( color, colorEntry);
+			double distance = dist.distance( color, colorEntry);
 			if ( distance < minDist) {
 				minDist = distance;
 				closest = entry;

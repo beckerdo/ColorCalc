@@ -37,7 +37,8 @@ public class ColorCalcTest {
 	@Test
     public void testParseOptions() {
 		assertTrue( null == ColorCalc.ins, "option i null");
-		assertTrue( null == ColorCalc.dicts, "option d null");
+        assertTrue( null == ColorCalc.dicts, "option d null");
+        assertTrue( ColorDistanceRGBEuclidean.class == ColorCalc.dist.getClass() , "option dist default");
 		assertTrue( null == ColorCalc.out, "option o null");
 		assertTrue( null == ColorCalc.sorts, "option s null");
 		assertTrue( null == ColorCalc.groups, "option g null");
@@ -55,9 +56,13 @@ public class ColorCalcTest {
 			// LOGGER.info( "Inputs length=" + ColorCalc.ins.length);
 			assertTrue( Arrays.deepEquals(ColorCalc.ins, new String []{"foo", "bar"}), "option i");
 
-			options = new String []{"-d","bar,baz"};			
-			ColorCalc.parseGatherOptions( options );
-			assertTrue( Arrays.deepEquals(ColorCalc.dicts, new String []{"bar", "baz"}), "option d");
+            options = new String []{"-d","bar,baz"};            
+            ColorCalc.parseGatherOptions( options );
+            assertTrue( Arrays.deepEquals(ColorCalc.dicts, new String []{"bar", "baz"}), "option d");
+
+            options = new String []{"-dist","RGBWeight"};            
+            ColorCalc.parseGatherOptions( options );
+            assertTrue( ColorDistanceRGBWeighted.class == ColorCalc.dist.getClass() , "option dist setting");
 
 			options = new String []{"-o","fred"};			
 			ColorCalc.parseGatherOptions( options );

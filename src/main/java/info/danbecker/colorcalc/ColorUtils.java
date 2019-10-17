@@ -15,7 +15,9 @@ public class ColorUtils {
 	
 	public static final String ESC = new String(new byte[] { 0x1B });
 
-	/** Return an RGB color or null */
+	/** Return an RGB or RGBA color or null from a given string in hexadecimal.
+	 *  Examples are "#ff7f3f", "808080ff"
+	 */
 	public static Color toColor(String colorString) {
 		if (null == colorString)
 			return null;
@@ -35,14 +37,14 @@ public class ColorUtils {
 		}
 	}
 
-	/** Return an Color as RGB hex string or "null" */
+	/** Return a hexadecimal String of RGB from a given color. Example "ff7f3f". */
 	public static String toRGB(Color color) {
 		if (null == color)
 			return null;
 		return String.format("%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue());
 	}
 
-	/** Return an Color as RGBA hex string or "null" */
+    /** Return a hexadecimal String of RGBA from a given color. Example "ff7f3fff". */
 	public static String toRGBA(Color color) {
 		if (null == color)
 			return null;
@@ -66,45 +68,6 @@ public class ColorUtils {
 			return String.format("%s[48;2;%d;%d;%dm", ESC, color.getRed(), color.getGreen(), color.getBlue());
 	}
 
-	/**
-	 * Return distance between two colors.
-	 * <p>
-	 * RGB distance from the formula discussed in
-	 * https://en.wikipedia.org/wiki/Color_difference#Euclidean
-	 * 
-	 * @param colorString
-	 * @return distance of RBG or Integer.MAX_VALUE for nulls
-	 */
-	public static double distanceWeighted(Color color1, Color color2) {
-		if (null == color1 || null == color2)
-			return Double.MAX_VALUE;
-		double rbar = ( color1.getRed() + color2.getRed() ) / 2.0;
-		// Squared distances
-		int ΔR2 =  ( color1.getRed() - color2.getRed() ) * ( color1.getRed() - color2.getRed() );
-		int ΔG2 =  ( color1.getGreen() - color2.getGreen() ) * ( color1.getGreen() - color2.getGreen() );
-		int ΔB2 =  ( color1.getBlue() - color2.getBlue() ) * ( color1.getBlue() - color2.getBlue() );
-		return Math.sqrt((2.0 + rbar/256.0) * ΔR2 + 4.0 * ΔG2 + (2.0 + (255.0-rbar)/256.0) * ΔB2 );
-	}
-	
-	/**
-	 * Return distance between two colors.
-	 * <p>
-	 * RGB distance from the formula discussed in
-	 * https://en.wikipedia.org/wiki/Color_difference#Euclidean
-	 * 
-	 * @param colorString
-	 * @return distance of RBG or Integer.MAX_VALUE for nulls
-	 */
-	public static double distanceEuclidean(Color color1, Color color2) {
-		if (null == color1 || null == color2)
-			return Double.MAX_VALUE;
-		// Squared distances
-		int ΔR2 =  ( color1.getRed() - color2.getRed() ) * ( color1.getRed() - color2.getRed() );
-		int ΔG2 =  ( color1.getGreen() - color2.getGreen() ) * ( color1.getGreen() - color2.getGreen() );
-		int ΔB2 =  ( color1.getBlue() - color2.getBlue() ) * ( color1.getBlue() - color2.getBlue() );
-		return Math.sqrt( ΔR2 + ΔG2 + ΔB2 );
-	}
-	
     /** Changes color to given alpha value. */
     public static Color changeAlpha( Color color, int alpha ) {
        Color newColor = new Color ( color.getRed(), color.getGreen(), color.getBlue(), alpha );
