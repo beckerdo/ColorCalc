@@ -130,7 +130,11 @@ public class ColorCalc {
 				try (Stream<String> stream = Files.lines(Path.of(in).toAbsolutePath())) {
 					stream.forEach(line-> {
 						try {
-							if ( line.startsWith("#")) {
+							String lineNoWhiteSpace = String.valueOf( line );
+							lineNoWhiteSpace.replaceAll("\\s+","");
+							if (( line.length() < 1) || (lineNoWhiteSpace.length() < 1 )) {
+								// Ignore white space lines
+							} else if ( line.startsWith("#") || line.startsWith( "//" )) {
 								LOGGER.debug("comment=" + line);
 								if (!table) {
 									writer.write( line + NL);
